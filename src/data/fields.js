@@ -391,6 +391,10 @@ const CATEGORIES = {
     "Darts Solved",
   ],
   "Foundation & Layout": [
+    "Foundation",
+    "FoundationElevator",
+    "outer foundation",
+
     "FoundationRotation",
     "Foundation Tile String E",
     "Foundation Tile String S",
@@ -597,7 +601,7 @@ const BOOL_FIELDS = [
   { "key": "SeenStars", "label": "Stars Seen", "value": false },
   { "key": "blue tents", "label": "Blue Tents Accessible", "value": false },
   { "key": "slept in blue tents", "label": "Slept in Blue Tents", "value": false },
-  { "key": "outer foundation", "label": "Outer Foundation Accessible", "value": false },
+  { "key": "outer foundation", "label": "Start With Outer Room Foundation Lol", "value": false },
   { "key": "outeroom drafted", "label": "Outer Room Drafted", "value": false },
   { "key": "throne room tomorrow", "label": "Throne Room Drafts Tomorrow", "value": false },
   { "key": "BedDig", "label": "Bed Dig Available", "value": false },
