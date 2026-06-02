@@ -305,6 +305,10 @@ const CATEGORIES = {
     "Main Course Buff",
     "allowance",
     "Tithes",
+    "149 Opened",
+    "233 Opened",
+    "304 Opened",
+    "370 Opened",
   ],
   "Room Levels": [
     "Aquarium Level",
@@ -455,7 +459,6 @@ const CATEGORIES = {
     "Tunnel Added Precipice",
     "Tunnel Added Tunnel",
     "Closed Exhibit Added",
-    "Mud Room Added",
   ],
 };
 
@@ -665,15 +668,16 @@ const BOOL_FIELDS = [
   { "key": "grotto scene seen", "label": "Grotto Scene Seen", "value": false },
   { "key": "Time Lock PM", "label": "Time Lock Is PM", "value": false },
   { "key": "Pawn Reset", "label": "Chess Pawn Reset", "value": false },
+  { "key": "149 Opened", "value": false },
+  { "key": "233 Opened", "value": false },
+  { "key": "304 Opened", "value": false },
+  { "key": "370 Opened", "value": false },
+  { "key": "securitydrafted", "value": false },
 ];
 
 // Hidden boolean fields — written to the save with fixed defaults, never shown in the UI.
 // These are internal game-state tracking flags extracted from a real save file.
 const HIDDEN_BOOL_FIELDS = [
-  { "key": "149 Opened", "value": false },
-  { "key": "233 Opened", "value": false },
-  { "key": "304 Opened", "value": false },
-  { "key": "370 Opened", "value": false },
   { "key": "46v", "value": false },
   { "key": "8 v", "value": false },
   { "key": "?Addition", "value": false },
@@ -802,7 +806,6 @@ const HIDDEN_BOOL_FIELDS = [
   { "key": "lunch box", "value": false },
   { "key": "mt holly tee", "value": false },
   { "key": "realm & rune", "value": false },
-  { "key": "securitydrafted", "value": false },
   { "key": "stampseen arch aries", "value": false },
   { "key": "stampseen corarica", "value": false },
   { "key": "stampseen eraja", "value": false },
