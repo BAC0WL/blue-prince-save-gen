@@ -675,6 +675,27 @@ const BOOL_FIELDS = [
   { "key": "securitydrafted", "value": false },
 ];
 
+// Ordered room list for Rarity Shifts (must match the order in save_template ARRAYS_TEMPLATE).
+// Values: 0 = Default, 1 = Commonplace, 2 = Uncommon, 3 = Unusual, 4 = Rare.
+const RARITY_ROOMS = [
+  "TUNNEL", "GUEST BEDROOM", "CLOISTER", "BOUDOIR", "ATTIC", "SOLARIUM",
+  "CLOSED EXHIBIT", "RUMPUS ROOM", "ROTUNDA", "BILLIARD ROOM", "BALLROOM",
+  "LAVATORY", "GREENHOUSE", "DORMITORY", "TROPHY ROOM", "TREASURE TROVE",
+  "THE KENNEL", "HER LADYSHIP'S CHAMBER", "GYMNASIUM", "PASSAGEWAY",
+  "WALK-IN CLOSET", "SPARE ROOM", "LABORATORY", "MAID'S CHAMBER", "WEIGHT ROOM",
+  "LOST & FOUND", "CORRIDOR", "PUMP ROOM", "CHAPEL", "SECRET PASSAGE", "FURNACE",
+  "STOREROOM", "EAST WING HALL", "LIBRARY", "ARCHIVES", "STUDY", "SHOWROOM",
+  "DEN", "COMMISSARY", "VESTIBULE", "WEST WING HALL", "CASINO", "BEDROOM",
+  "OBSERVATORY", "PARLOR", "WINE CELLAR", "THE POOL", "HALLWAY", "MUSIC ROOM",
+  "OFFICE", "COAT CHECK", "AQUARIUM", "CLOSET", "FREEZER", "DINING ROOM",
+  "DARKROOM", "PLANETARIUM", "SERVANT'S QUARTERS", "MASTER BEDROOM", "LOCKSMITH",
+  "SECURITY", "COURTYARD", "KITCHEN", "WORKSHOP", "NURSERY", "DOVECOTE", "PANTRY",
+  "CLOCK TOWER", "THRONE ROOM", "PATIO", "DRAFTING STUDIO", "BUNK ROOM",
+  "CONFERENCE ROOM", "FOYER", "MAIL ROOM", "GIFT SHOP", "DRAWING ROOM", "VAULT",
+  "TERRACE", "LAUNDRY ROOM", "CHAMBER OF MIRRORS", "BOILER ROOM", "MECHANARIUM",
+  "NOOK", "UTILITY CLOSET", "GREAT HALL",
+];
+
 // Hidden boolean fields — written to the save with fixed defaults, never shown in the UI.
 // These are internal game-state tracking flags extracted from a real save file.
 const HIDDEN_BOOL_FIELDS = [
