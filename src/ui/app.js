@@ -286,6 +286,7 @@ function refreshEditor() {
     }
   });
 
+  refreshRarityPanel();
   updateBoolCount();
   updateModifiedCounts();
   updateFooter();
@@ -326,6 +327,7 @@ function updateModifiedCounts() {
   const flagMods = BOOL_FIELDS.filter(f => !BOOLS_IN_CATEGORIES.has(f.key) && isModified(1, f.key)).length;
   const flagEl = document.getElementById('cnt-flags');
   if (flagEl) flagEl.textContent = flagMods > 0 ? flagMods + ' ✎' : '';
+  updateRarityCount();
 }
 
 // ── Saved configs ─────────────────────────────────────────────────────────────
@@ -412,6 +414,116 @@ function renderConfigList() {
     '<button class="btn btn-sm btn-danger" onclick="deleteConfig(' + i + ')">✕</button>' +
     '</div>'
   ).join('');
+}
+
+// ── Rarity Shifts panel ───────────────────────────────────────────────────────
+
+const RARITY_LABELS = ['Default', 'Commonplace', 'Standard', 'Unusual', 'Rare'];
+
+function raritySlug(room) {
+  return room.toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/'/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function buildRarityPanel() {
+  const main = document.getElementById('main-panels');
+  const div = document.createElement('div');
+  div.className = 'panel';
+  div.id = 'panel-rarity-shifts';
+
+  div.innerHTML =
+    '<div class="section-header">' +
+    '<h2>Room Rarity Shifts</h2>' +
+    '<span class="count" id="rarity-mod-count">0 modified</span>' +
+    '</div>' +
+    '<p class="desc-text">Click the colored dots to set each room\'s rarity. Place room images (144×144 PNG) in <code>src/ui/rarity/</code> named after the slug shown on each card. Applied to all 4 slots.</p>' +
+    '<button class="btn" style="margin-bottom:16px" onclick="resetAllRarities()">↺ Reset All to Default</button>' +
+    '<div class="rarity-grid" id="rarity-grid"></div>';
+
+  main.appendChild(div);
+
+  const grid = div.querySelector('#rarity-grid');
+  const sortedRooms = RARITY_ROOMS.map((room, idx) => ({ room, idx }))
+    .sort((a, b) => a.room.localeCompare(b.room));
+  sortedRooms.forEach(({ room, idx }) => {
+    const key = '_rarity_' + room;
+    const val = getSlotValue(1, key);
+    const slug = raritySlug(room);
+    const card = document.createElement('div');
+    card.className = 'rarity-card' + ((key in slotData) ? ' modified' : '');
+    card.setAttribute('data-idx', idx);
+
+    const dotsHtml = [0, 1, 2, 3, 4].map(i =>
+      '<button class="rarity-dot' + (val === i ? ' active' : '') + '" data-level="' + i + '" ' +
+      'title="' + RARITY_LABELS[i] + '" ' +
+      'onclick="handleRarityChange(' + idx + ',' + i + ')"></button>'
+    ).join('');
+
+    card.innerHTML =
+      '<div class="rarity-img-wrap">' +
+      '<img src="src/ui/rarity/' + slug + '.png" alt="' + escHtml(room) + '" onerror="this.classList.add(\'broken\')">' +
+      '</div>' +
+      '<div class="rarity-levels">' + dotsHtml + '</div>' +
+      '<div class="rarity-level-label rarity-lv-' + val + '">' + RARITY_LABELS[val] + '</div>';
+
+    grid.appendChild(card);
+  });
+}
+
+function handleRarityChange(idx, val) {
+  const room = RARITY_ROOMS[idx];
+  const key = '_rarity_' + room;
+  if (val === 0) {
+    delete slotData[key];
+  } else {
+    slotData[key] = val;
+  }
+  const card = document.querySelector('.rarity-card[data-idx="' + idx + '"]');
+  if (card) {
+    card.className = 'rarity-card' + ((key in slotData) ? ' modified' : '');
+    card.querySelectorAll('.rarity-dot').forEach(dot => {
+      dot.classList.toggle('active', parseInt(dot.getAttribute('data-level')) === val);
+    });
+    const lbl = card.querySelector('.rarity-level-label');
+    if (lbl) { lbl.textContent = RARITY_LABELS[val]; lbl.className = 'rarity-level-label rarity-lv-' + val; }
+  }
+  updateModifiedCounts();
+  updateFooter();
+}
+
+function resetAllRarities() {
+  RARITY_ROOMS.forEach(room => { delete slotData['_rarity_' + room]; });
+  refreshRarityPanel();
+  updateModifiedCounts();
+  updateFooter();
+  toast('All rarity shifts reset to default');
+}
+
+function refreshRarityPanel() {
+  RARITY_ROOMS.forEach((room, idx) => {
+    const key = '_rarity_' + room;
+    const val = getSlotValue(1, key);
+    const card = document.querySelector('.rarity-card[data-idx="' + idx + '"]');
+    if (!card) return;
+    card.className = 'rarity-card' + ((key in slotData) ? ' modified' : '');
+    card.querySelectorAll('.rarity-dot').forEach(dot => {
+      dot.classList.toggle('active', parseInt(dot.getAttribute('data-level')) === val);
+    });
+    const lbl = card.querySelector('.rarity-level-label');
+    if (lbl) { lbl.textContent = RARITY_LABELS[val]; lbl.className = 'rarity-level-label rarity-lv-' + val; }
+  });
+  updateRarityCount();
+}
+
+function updateRarityCount() {
+  const mods = RARITY_ROOMS.filter(r => ('_rarity_' + r) in slotData).length;
+  const el = document.getElementById('rarity-mod-count');
+  if (el) el.textContent = mods > 0 ? mods + ' modified' : '0 modified';
+  const navEl = document.getElementById('cnt-rarity');
+  if (navEl) navEl.textContent = mods > 0 ? mods + ' ✎' : '';
 }
 
 // ── Downloads ─────────────────────────────────────────────────────────────────
@@ -503,6 +615,7 @@ function toast(msg) {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 buildEditorPanels();
+buildRarityPanel();
 showPanel('editor-Core');
 updateBoolCount();
 updateFooter();
