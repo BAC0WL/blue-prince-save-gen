@@ -62,6 +62,13 @@ function buildObjsStr(slot) {
   return parts.join(',');
 }
 
+function buildRarityValuesStr(slot) {
+  return RARITY_ROOMS.map(room => {
+    const val = getSlotValue(slot, '_rarity_' + room);
+    return '\t\t\t\t{\n\t\t\t\t\t"__type" : "System.Int32"' + val + '\n\t\t\t\t}';
+  }).join(',\n');
+}
+
 function buildSlotSection(slot) {
   const bpKey = slot === 1 ? 'BluePrint' : 'BluePrint' + slot;
   const now   = new Date().toISOString().replace('T', ' ').slice(0, 19);
@@ -151,7 +158,10 @@ function buildSlotSection(slot) {
     '\t\t"value" : {',
     '\t\t"objs" : {' + objsStr,
     '\t\t},',
-    ARRAYS_TEMPLATE + SLOT_FOOTER,
+    ARRAYS_TEMPLATE.replace(
+      /"Rarity Shifts Values":\[[\s\S]*?\]/,
+      '"Rarity Shifts Values":[\n' + buildRarityValuesStr(slot) + '\n\t\t\t]'
+    ) + SLOT_FOOTER,
     saveInfo,
     currentSave,
   ].join('\n');
