@@ -192,7 +192,8 @@ function buildFieldRow(grid, f) {
     const opts = f.options.map(o =>
       '<option value="' + o.value + '"' + (val === o.value ? ' selected' : '') + '>' + escHtml(o.label) + '</option>'
     ).join('');
-    inputHtml = '<select onchange="handleFieldChange(\'' + ek + '\', parseInt(this.value))">' + opts + '</select>';
+    const selectVal = f.type === 'System.String' ? 'this.value' : 'parseInt(this.value)';
+    inputHtml = '<select onchange="handleFieldChange(\'' + ek + '\', ' + selectVal + ')">' + opts + '</select>';
   } else if (f.type === 'System.String') {
     inputHtml = '<input type="text" value="' + escHtml(String(val)) + '" oninput="handleFieldChange(\'' + ek + '\', this.value)">';
   } else if (f.type === 'System.Single') {
