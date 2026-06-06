@@ -73,9 +73,9 @@ const PRESETS = [
   },
   {
     name: 'Room Practice',
-    desc: 'Ever wanted to practice your Mora Jai solves or Boiler Room strat? Well now you can I guess',
+    desc: "Ever wanted to practice your Mora Jai solves or Boiler Room strat? 🤓 (Set which room to practice in Resources / Sleep Room)",
     emoji: '🏋',
-    values: { 'DAY': 0, 'Chess Power': 6, 'Blessing': 'Monk', 'Blessing Days': 50 },
+    values: { 'DAY': 0, 'Chess Power': 6, 'West Gate Open': 'true', 'Blessing': 'Monk', 'Blessing Days': 50 },
   }
 ];
 
