@@ -4,7 +4,7 @@ A tool for creating custom save files for **Blue Prince**
 
 ## Quick Start
 
-Open `index.html` in any browser (Chrome, Firefox, Edge). No server or install needed.
+Open `index.html` in any browser or go to https://bac0wl.github.io/blue-prince-save-gen/  no server or install needed.
 
 
 ---
@@ -117,9 +117,6 @@ Always **close the game** and **back up your existing save** before replacing th
 ---
 
 ## In The Future
-
-**Rarity Changes**
-- If there is any interest I can try and make a rarity changes section to allow for an almost entirely custom mt holly (it only lets you change ones that you can already do via conservatory)
 
 **Foundation Map Placement**
 - Replace the Foundation & Layout section with just a map that you can drag a foundation onto and have it placed in game.
