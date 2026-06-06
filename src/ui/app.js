@@ -70,6 +70,12 @@ const PRESETS = [
     desc: 'Day 1 King',
     emoji: '♟',
     values: { 'DAY': 0, 'Chess Power': 6 },
+  },
+  {
+    name: 'Room Practice',
+    desc: 'Ever wanted to practice your Mora Jai solves or Boiler Room strat? Well now you can I guess',
+    emoji: '🏋',
+    values: { 'DAY': 0, 'Chess Power': 6, 'Blessing': 'Monk', 'Blessing Days': 50 },
   }
 ];
 
@@ -86,8 +92,11 @@ function escHtml(s) {
 function buildEditorPanels() {
   const main = document.getElementById('main-panels');
 
+  const SPECIAL_CAT_PANELS = new Set(['Chamber of Mirrors Additions', 'Floorplan Additions']);
+
   // One panel per CATEGORY
   Object.entries(CATEGORIES).forEach(([catName, keys]) => {
+    if (SPECIAL_CAT_PANELS.has(catName)) return;
     const div = document.createElement('div');
     div.className = 'panel';
     div.id = 'panel-editor-' + catName;
@@ -194,6 +203,18 @@ function buildFieldRow(grid, f) {
     ).join('');
     const selectVal = f.type === 'System.String' ? 'this.value' : 'parseInt(this.value)';
     inputHtml = '<select onchange="handleFieldChange(\'' + ek + '\', ' + selectVal + ')">' + opts + '</select>';
+  } else if (f.uiType === 'searchable-select') {
+    const sid = _ssid(f.key);
+    inputHtml =
+      '<div class="ss-wrap" id="' + sid + '_wrap">' +
+      '<input class="ss-input" type="text" autocomplete="off"' +
+      ' value="' + escHtml(String(val)) + '"' +
+      ' placeholder="Search…"' +
+      ' oninput="handleSsInput(\'' + ek + '\', this)"' +
+      ' onfocus="handleSsInput(\'' + ek + '\', this)"' +
+      ' onblur="handleSsBlur(\'' + ek + '\', this)">' +
+      '<div class="ss-dropdown" id="' + sid + '_drop"></div>' +
+      '</div>';
   } else if (f.type === 'System.String') {
     inputHtml = '<input type="text" value="' + escHtml(String(val)) + '" oninput="handleFieldChange(\'' + ek + '\', this.value)">';
   } else if (f.type === 'System.Single') {
@@ -224,6 +245,52 @@ function handleUpgradePick(key, val) {
 
 function handleFieldChange(key, val) {
   setSlotValue(1, key, val);
+  const row = document.querySelector('.field-row[data-key="' + key + '"]');
+  if (row) row.className = 'field-row' + (isModified(1, key) ? ' modified' : '');
+}
+
+// ── Searchable select ─────────────────────────────────────────────────────────
+
+function _ssid(key) { return 'ss_' + key.replace(/[^a-zA-Z0-9]/g, '_'); }
+
+function handleSsInput(key, input) {
+  const f = fieldByKey[key];
+  const drop = document.getElementById(_ssid(key) + '_drop');
+  if (!drop) return;
+  const term = input.value.toLowerCase();
+  const filtered = term ? f.options.filter(o => o.label.toLowerCase().includes(term)) : f.options;
+  const ek2 = key.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  drop.innerHTML = filtered.map(o =>
+    '<div class="ss-option" onmousedown="event.preventDefault();handleSsSelect(\'' + ek2 + '\',\'' +
+    String(o.value).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' +
+    escHtml(o.label) + '</div>'
+  ).join('');
+  drop.classList.toggle('open', filtered.length > 0);
+}
+
+function handleSsBlur(key, input) {
+  setTimeout(function () {
+    const drop = document.getElementById(_ssid(key) + '_drop');
+    if (drop) drop.classList.remove('open');
+    const f = fieldByKey[key];
+    const match = f.options.find(o => o.value.toLowerCase() === input.value.toLowerCase());
+    if (match) {
+      setSlotValue(1, key, match.value);
+      input.value = match.value;
+      const row = document.querySelector('.field-row[data-key="' + key + '"]');
+      if (row) row.className = 'field-row' + (isModified(1, key) ? ' modified' : '');
+    } else {
+      input.value = String(getSlotValue(1, key));
+    }
+  }, 0);
+}
+
+function handleSsSelect(key, value) {
+  setSlotValue(1, key, value);
+  const wrap = document.getElementById(_ssid(key) + '_wrap');
+  if (wrap) wrap.querySelector('.ss-input').value = value;
+  const drop = document.getElementById(_ssid(key) + '_drop');
+  if (drop) drop.classList.remove('open');
   const row = document.querySelector('.field-row[data-key="' + key + '"]');
   if (row) row.className = 'field-row' + (isModified(1, key) ? ' modified' : '');
 }
@@ -288,6 +355,8 @@ function refreshEditor() {
   });
 
   refreshRarityPanel();
+  refreshChamberPanel();
+  refreshFloorplanPanel();
   updateBoolCount();
   updateModifiedCounts();
   updateFooter();
@@ -329,6 +398,8 @@ function updateModifiedCounts() {
   const flagEl = document.getElementById('cnt-flags');
   if (flagEl) flagEl.textContent = flagMods > 0 ? flagMods + ' ✎' : '';
   updateRarityCount();
+  updateChamberCount();
+  updateFloorplanCount();
 }
 
 // ── Saved configs ─────────────────────────────────────────────────────────────
@@ -527,6 +598,192 @@ function updateRarityCount() {
   if (navEl) navEl.textContent = mods > 0 ? mods + ' ✎' : '';
 }
 
+// ── Addition card panels (Chamber of Mirrors & Floorplan) ─────────────────────
+
+function additionDisplayName(key) {
+  const f = fieldByKey[key];
+  return ((f && f.label) ? f.label : key).replace(/\s+Added.*$/i, '').trim();
+}
+
+function additionSlug(name) {
+  return name.toLowerCase()
+    .replace(/&/g, 'and').replace(/'/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function buildChamberAdditionsPanel() {
+  const catName = 'Chamber of Mirrors Additions';
+  const allKeys = CATEGORIES[catName];
+  const main = document.getElementById('main-panels');
+  const div = document.createElement('div');
+  div.className = 'panel';
+  div.id = 'panel-editor-' + catName;
+
+  div.innerHTML =
+    '<div class="section-header">' +
+    '<h2>Chamber of Mirrors Additions</h2>' +
+    '<span class="count" id="chamber-mod-count">0 modified</span>' +
+    '</div>' +
+    '<p class="desc-text">How many times each room has been added to the mirror pool. 0 = not added. Applied to all 4 slots.</p>' +
+    '<button class="btn" style="margin-bottom:16px" onclick="resetAllChamberAdditions()">&#8635; Reset All to 0</button>' +
+    '<div class="rarity-grid" id="chamber-grid"></div>';
+
+  main.appendChild(div);
+
+  const grid = div.querySelector('#chamber-grid');
+
+  allKeys
+    .filter(function (k) { const f = fieldByKey[k]; return f && !f.hidden; })
+    .sort(function (a, b) { return additionDisplayName(a).localeCompare(additionDisplayName(b)); })
+    .forEach(function (key) {
+      const val = getSlotValue(1, key);
+      const displayName = additionDisplayName(key);
+      const slug = additionSlug(displayName);
+      const ek = key.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+      const card = document.createElement('div');
+      card.className = 'rarity-card' + (isModified(1, key) ? ' modified' : '');
+      card.setAttribute('data-key', key);
+
+      card.innerHTML =
+        '<div class="rarity-img-wrap">' +
+        '<img src="src/ui/rarity/' + slug + '.png" alt="' + escHtml(displayName) + '" onerror="this.classList.add(\'broken\')">' +
+        '</div>' +
+        '<div class="rarity-room-name">' + escHtml(displayName) + '</div>' +
+        '<input type="number" class="chamber-count-input" min="0" step="1" value="' + val + '" ' +
+        'onchange="handleChamberChange(\'' + ek + '\', parseInt(this.value) || 0)">';
+
+      grid.appendChild(card);
+    });
+
+  updateChamberCount();
+}
+
+function handleChamberChange(key, val) {
+  setSlotValue(1, key, val);
+  const card = document.querySelector('.rarity-card[data-key="' + key + '"]');
+  if (card) card.className = 'rarity-card' + (isModified(1, key) ? ' modified' : '');
+}
+
+function resetAllChamberAdditions() {
+  CATEGORIES['Chamber of Mirrors Additions'].forEach(function (key) { delete slotData[key]; });
+  refreshChamberPanel();
+  updateModifiedCounts();
+  updateFooter();
+  toast('Chamber of Mirrors additions reset to 0');
+}
+
+function refreshChamberPanel() {
+  CATEGORIES['Chamber of Mirrors Additions'].forEach(function (key) {
+    const val = getSlotValue(1, key);
+    const card = document.querySelector('.rarity-card[data-key="' + key + '"]');
+    if (!card) return;
+    card.className = 'rarity-card' + (isModified(1, key) ? ' modified' : '');
+    const inp = card.querySelector('.chamber-count-input');
+    if (inp) inp.value = val;
+  });
+  updateChamberCount();
+}
+
+function updateChamberCount() {
+  const mods = CATEGORIES['Chamber of Mirrors Additions'].filter(function (k) { return k in slotData; }).length;
+  const el = document.getElementById('chamber-mod-count');
+  if (el) el.textContent = mods > 0 ? mods + ' modified' : '0 modified';
+}
+
+function buildFloorplanAdditionsPanel() {
+  const catName = 'Floorplan Additions';
+  const allKeys = CATEGORIES[catName];
+  const main = document.getElementById('main-panels');
+  const div = document.createElement('div');
+  div.className = 'panel';
+  div.id = 'panel-editor-' + catName;
+
+  div.innerHTML =
+    '<div class="section-header">' +
+    '<h2>Floorplan Additions</h2>' +
+    '<span class="count" id="floorplan-mod-count">0 on</span>' +
+    '</div>' +
+    '<p class="desc-text">Toggle which rooms are added to the drafting pool. Click a card to toggle on/off. Applied to all 4 slots.</p>' +
+    '<button class="btn" style="margin-bottom:16px" onclick="resetAllFloorplanAdditions()">&#8635; Reset All to Off</button>' +
+    '<div class="rarity-grid" id="floorplan-grid"></div>';
+
+  main.appendChild(div);
+
+  const grid = div.querySelector('#floorplan-grid');
+  const seen = new Set();
+
+  allKeys
+    .filter(function (k) { if (seen.has(k)) return false; seen.add(k); return fieldByKey[k] !== undefined; })
+    .sort(function (a, b) { return additionDisplayName(a).localeCompare(additionDisplayName(b)); })
+    .forEach(function (key) {
+      const val = getSlotValue(1, key);
+      const displayName = additionDisplayName(key);
+      const slug = additionSlug(displayName);
+
+      const card = document.createElement('div');
+      card.className = 'rarity-card addition-toggle' + (val ? ' addition-on' : '');
+      card.setAttribute('data-key', key);
+      card.onclick = (function (k) { return function () { handleFloorplanToggle(k); }; })(key);
+
+      card.innerHTML =
+        '<div class="rarity-img-wrap">' +
+        '<img src="src/ui/rarity/' + slug + '.png" alt="' + escHtml(displayName) + '" onerror="this.classList.add(\'broken\')">' +
+        '</div>' +
+        '<div class="rarity-room-name">' + escHtml(displayName) + '</div>' +
+        '<div class="addition-toggle-label">' + (val ? 'ON' : 'OFF') + '</div>';
+
+      grid.appendChild(card);
+    });
+
+  updateFloorplanCount();
+}
+
+function handleFloorplanToggle(key) {
+  const newVal = !getSlotValue(1, key);
+  setSlotValue(1, key, newVal);
+  const card = document.querySelector('.rarity-card[data-key="' + key + '"]');
+  if (card) {
+    card.classList.toggle('addition-on', !!newVal);
+    const lbl = card.querySelector('.addition-toggle-label');
+    if (lbl) lbl.textContent = newVal ? 'ON' : 'OFF';
+  }
+}
+
+function resetAllFloorplanAdditions() {
+  const seen = new Set();
+  CATEGORIES['Floorplan Additions'].forEach(function (key) {
+    if (seen.has(key)) return; seen.add(key); delete slotData[key];
+  });
+  refreshFloorplanPanel();
+  updateModifiedCounts();
+  updateFooter();
+  toast('Floorplan additions reset to off');
+}
+
+function refreshFloorplanPanel() {
+  const seen = new Set();
+  CATEGORIES['Floorplan Additions'].forEach(function (key) {
+    if (seen.has(key)) return; seen.add(key);
+    const val = getSlotValue(1, key);
+    const card = document.querySelector('.rarity-card[data-key="' + key + '"]');
+    if (!card) return;
+    card.classList.toggle('addition-on', !!val);
+    const lbl = card.querySelector('.addition-toggle-label');
+    if (lbl) lbl.textContent = val ? 'ON' : 'OFF';
+  });
+  updateFloorplanCount();
+}
+
+function updateFloorplanCount() {
+  const seen = new Set();
+  const on = CATEGORIES['Floorplan Additions'].filter(function (k) {
+    if (seen.has(k)) return false; seen.add(k); return !!getSlotValue(1, k);
+  }).length;
+  const el = document.getElementById('floorplan-mod-count');
+  if (el) el.textContent = on + ' on';
+}
+
 // ── Downloads ─────────────────────────────────────────────────────────────────
 
 async function downloadEncrypted() {
@@ -617,10 +874,18 @@ function toast(msg) {
 
 buildEditorPanels();
 buildRarityPanel();
+buildChamberAdditionsPanel();
+buildFloorplanAdditionsPanel();
 showPanel('editor-Core');
 updateBoolCount();
 updateFooter();
 initDropZone();
+
+document.addEventListener('click', function (e) {
+  if (!e.target.closest('.ss-wrap')) {
+    document.querySelectorAll('.ss-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+});
 
 // Restore saved installer paths from localStorage
 try {

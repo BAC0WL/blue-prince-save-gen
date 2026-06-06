@@ -166,6 +166,21 @@ input[type=number]:focus,
 input[type=text]:focus,
 select:focus { border-color: var(--accent); background: var(--bg4); }
 
+/* ── Searchable select ───────────────────────────────────────────────────────── */
+.ss-wrap { position: relative; }
+.ss-dropdown {
+  display: none; position: absolute; top: calc(100% + 2px); left: 0;
+  min-width: 100%; max-height: 220px; overflow-y: auto;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; z-index: 200;
+  box-shadow: 0 4px 14px rgba(0,0,0,.45);
+}
+.ss-dropdown.open { display: block; }
+.ss-option {
+  padding: 7px 10px; font-size: 13px; color: var(--text); cursor: pointer;
+}
+.ss-option:hover { background: var(--bg4); color: var(--accent); }
+
 /* ── Boolean flags ───────────────────────────────────────────────────────────── */
 
 .bool-grid {
@@ -497,6 +512,64 @@ label.file-label:hover { background: var(--bg3); color: var(--text); }
 .rarity-lv-2 { color: #9d636f; }
 .rarity-lv-3 { color: #cf5772; }
 .rarity-lv-4 { color: #ff3b66; }
+
+/* ── Addition card panels (Chamber of Mirrors & Floorplan) ─────────────────── */
+
+.chamber-count-input {
+  width: 64px; padding: 4px 6px; font-size: 12px; text-align: center;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); outline: none;
+  font-family: inherit;
+}
+.chamber-count-input:focus { border-color: var(--accent); background: var(--bg4); }
+
+.addition-toggle { cursor: pointer; }
+.rarity-card.addition-on { border-color: var(--green); background: var(--green-bg); }
+.rarity-card.addition-on .rarity-room-name { color: var(--green); }
+.addition-toggle-label {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--text3);
+}
+.rarity-card.addition-on .addition-toggle-label { color: var(--green); }
+
+.add-count-dot {
+  width: 24px; height: 24px;
+  border-radius: 5px; border: 2px solid transparent;
+  cursor: pointer; transition: transform .1s, filter .1s;
+  padding: 0; flex-shrink: 0;
+}
+.add-count-dot:hover { transform: scale(1.15); filter: brightness(1.25); }
+
+.add-count-dot[data-level="0"] {
+  background: transparent; border-color: rgba(90,106,136,.5); position: relative;
+}
+.add-count-dot[data-level="0"]::before,
+.add-count-dot[data-level="0"]::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 60%; height: 2px; background: rgba(90,106,136,.6);
+  border-radius: 1px; transform-origin: center;
+}
+.add-count-dot[data-level="0"]::before { transform: translate(-50%, -50%) rotate(45deg); }
+.add-count-dot[data-level="0"]::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+.add-count-dot.active[data-level="0"] { border-color: #8a9ab8; }
+.add-count-dot.active[data-level="0"]::before,
+.add-count-dot.active[data-level="0"]::after { background: #8a9ab8; }
+
+.add-count-dot[data-level="1"] { background: rgba(61,186,120,.15); border-color: rgba(61,186,120,.40); }
+.add-count-dot[data-level="2"] { background: rgba(61,186,120,.35); border-color: rgba(61,186,120,.60); }
+.add-count-dot[data-level="3"] { background: rgba(61,186,120,.55); border-color: rgba(61,186,120,.80); }
+.add-count-dot.active[data-level="1"] { background: #3dba78; border-color: #3dba78; }
+.add-count-dot.active[data-level="2"] { background: #2da060; border-color: #2da060; }
+.add-count-dot.active[data-level="3"] { background: #1d8045; border-color: #1d8045; }
+
+.add-count-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.add-cnt-0 { color: #8a9ab8; }
+.add-cnt-1 { color: #3dba78; }
+.add-cnt-2 { color: #2da060; }
+.add-cnt-3 { color: #1d8045; }
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────────── */
 
