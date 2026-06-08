@@ -571,6 +571,55 @@ label.file-label:hover { background: var(--bg3); color: var(--text); }
 .add-cnt-2 { color: #2da060; }
 .add-cnt-3 { color: #1d8045; }
 
+/* ── Foundation grid ─────────────────────────────────────────────────────────── */
+
+.foundation-section-label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--text3); margin: 16px 0 8px;
+}
+
+.foundation-rotation-controls {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  flex-wrap: wrap; justify-content: center; max-width: 400px; margin-left: auto; margin-right: auto;
+}
+
+#foundation-dir-label {
+  font-size: 13px; color: var(--text2);
+  min-width: 110px; text-align: center;
+}
+
+.foundation-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  max-width: 360px;
+  margin: 0 auto 8px;
+  padding: 10px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  background: var(--bg2);
+}
+
+.foundation-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg3);
+  transition: border-color .1s, background .1s;
+}
+.foundation-cell:hover { background: var(--bg4); border-color: var(--border2); }
+.foundation-cell.selected { border-color: var(--accent); background: var(--accent-bg); }
+.foundation-cell img { width: 85%; height: 85%; object-fit: contain; }
+
+.foundation-coord-label {
+  font-size: 12px; color: var(--text2);
+  margin: 4px auto 16px; font-family: monospace;
+  text-align: center; max-width: 360px;
+}
+
 /* ── Scrollbar ───────────────────────────────────────────────────────────────── */
 
 ::-webkit-scrollbar       { width: 6px; }
