@@ -400,9 +400,6 @@ const EDITABLE_FIELDS = [
   { "key": "Darts Solved", "type": "System.Int32", "value": 0, "label": "Darts Solved", "desc": "How many times the Darts puzzle has been solved this run." },
   { "key": "FoundationRotation", "type": "System.Single", "value": 270.0, "label": "Foundation Rotation (\u00b0)", "desc": "Rotation of the starting foundation tile in degrees. 0, 90, 180, or 270." },
   { "key": "NETWORK PASSWORD", "type": "System.String", "value": "SWANSONG", "label": "Network Password", "desc": "The current password for the network terminal. Default is SWANSONG. Why do they let you change this?" },
-  { "key": "Foundation Tile String E", "type": "System.String", "value": "Tile 38", "label": "Foundation Tile (East)", "desc": "Which foundation tile is placed on the East side. E.g. 'Tile 38'." },
-  { "key": "Foundation Tile String S", "type": "System.String", "value": "Tile 34", "label": "Foundation Tile (South)", "desc": "Which foundation tile is placed on the South side. E.g. 'Tile 34'." },
-  { "key": "Foundation Tile String W", "type": "System.String", "value": "Tile 28", "label": "Foundation Tile (West)", "desc": "Which foundation tile is placed on the West side. E.g. 'Tile 28'. Not sure how these 3 work if someone wants to send me different save files with foundations i could work it out and make a custom thing to place foundation but eh, if you have it on default its rank 7 middle" },
 ];
 
 // Combined — do not edit this line
@@ -530,9 +527,6 @@ const CATEGORIES = {
     "outer foundation",
     "foundaiton tile",
     "FoundationRotation",
-    "Foundation Tile String E",
-    "Foundation Tile String S",
-    "Foundation Tile String W",
   ],
   "Chamber of Mirrors Additions": [
     "Aquarium Added",
