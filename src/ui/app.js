@@ -245,8 +245,10 @@ function handleUpgradePick(key, val) {
 
 function handleFieldChange(key, val) {
   setSlotValue(1, key, val);
-  const row = document.querySelector('.field-row[data-key="' + key + '"]');
-  if (row) row.className = 'field-row' + (isModified(1, key) ? ' modified' : '');
+  const mod = isModified(1, key);
+  document.querySelectorAll('.field-row[data-key="' + key + '"]').forEach(row => {
+    row.className = 'field-row' + (mod ? ' modified' : '');
+  });
 }
 
 // ── Searchable select ─────────────────────────────────────────────────────────
@@ -298,12 +300,10 @@ function handleSsSelect(key, value) {
 function toggleBool(key) {
   const newVal = !getSlotValue(1, key);
   setSlotValue(1, key, newVal);
-
-  const item = document.querySelector('.bool-item[data-key="' + key + '"]');
-  if (item) {
+  document.querySelectorAll('.bool-item[data-key="' + key + '"]').forEach(item => {
     item.className = 'bool-item' + (newVal ? ' on' : '');
     item.querySelector('.bool-check').textContent = newVal ? '✓' : '';
-  }
+  });
   updateBoolCount();
 }
 
@@ -324,6 +324,13 @@ function showPanel(id) {
 
   const btn = document.querySelector('[onclick="showPanel(\'' + id + '\')"]');
   if (btn) btn.classList.add('active');
+
+  // Navigating away from search via a nav button clears the search input
+  if (id !== 'search') {
+    const si = document.querySelector('.sidebar-search');
+    if (si && si === document.activeElement) return; // user is typing — don't clear
+    if (si) si.value = '';
+  }
 }
 
 // ── Refresh editor ────────────────────────────────────────────────────────────
@@ -786,6 +793,106 @@ function updateFloorplanCount() {
   if (el) el.textContent = on + ' on';
 }
 
+// ── Sidebar collapse ──────────────────────────────────────────────────────────
+
+function toggleSidebar() {
+  const collapsed = document.querySelector('.app').classList.toggle('sidebar-collapsed');
+  const arrow = document.getElementById('sidebar-arrow');
+  if (arrow) arrow.textContent = collapsed ? '▶' : '◀';
+  try { localStorage.setItem('bp_sidebar_collapsed', collapsed ? '1' : '0'); } catch (e) {}
+}
+
+// ── Global search ─────────────────────────────────────────────────────────────
+
+const SEARCH_EXCLUDE_KEYS = new Set(CATEGORIES['Foundation & Layout'] || []);
+
+function getSectionForKey(key) {
+  for (const [cat, keys] of Object.entries(CATEGORIES)) {
+    if (keys.includes(key)) return cat;
+  }
+  return 'Flags';
+}
+
+function buildSearchPanel() {
+  const main = document.getElementById('main-panels');
+  const div = document.createElement('div');
+  div.className = 'panel';
+  div.id = 'panel-search';
+  div.innerHTML =
+    '<div class="section-header">' +
+    '<h2>Search</h2>' +
+    '<span class="count" id="search-count"></span>' +
+    '</div>' +
+    '<div id="search-results"><p class="desc-text">Start typing to search across all fields.</p></div>';
+  main.appendChild(div);
+}
+
+function handleGlobalSearch(term) {
+  const t = term.trim().toLowerCase();
+
+  if (!t) {
+    const el = document.getElementById('search-results');
+    if (el) el.innerHTML = '<p class="desc-text">Start typing to search across all fields.</p>';
+    const cnt = document.getElementById('search-count');
+    if (cnt) cnt.textContent = '';
+    return;
+  }
+
+  showPanel('search');
+
+  const matches = [];
+
+  ALL_FIELDS.forEach(f => {
+    if (f.hidden || SEARCH_EXCLUDE_KEYS.has(f.key)) return;
+    if (((f.label || '') + ' ' + (f.desc || '')).toLowerCase().includes(t)) {
+      matches.push({ type: 'field', f, section: getSectionForKey(f.key) });
+    }
+  });
+
+  BOOL_FIELDS.forEach(f => {
+    if (SEARCH_EXCLUDE_KEYS.has(f.key)) return;
+    if ((f.label || f.key).toLowerCase().includes(t)) {
+      matches.push({ type: 'bool', f, section: getSectionForKey(f.key) });
+    }
+  });
+
+  const el = document.getElementById('search-results');
+  const cnt = document.getElementById('search-count');
+  el.innerHTML = '';
+  cnt.textContent = matches.length + (matches.length === 1 ? ' result' : ' results');
+
+  if (!matches.length) {
+    el.innerHTML = '<p class="desc-text">No fields match &ldquo;' + escHtml(term.trim()) + '&rdquo;.</p>';
+    return;
+  }
+
+  matches.forEach(m => {
+    const wrap = document.createElement('div');
+    wrap.className = 'search-result-wrap';
+
+    const tag = document.createElement('span');
+    tag.className = 'search-section-tag';
+    tag.textContent = m.section;
+    wrap.appendChild(tag);
+
+    if (m.type === 'field') {
+      buildFieldRow(wrap, m.f);
+    } else {
+      const val = getSlotValue(1, m.f.key);
+      const item = document.createElement('div');
+      item.className = 'bool-item' + (val ? ' on' : '');
+      item.setAttribute('data-key', m.f.key);
+      item.onclick = function () { toggleBool(m.f.key); };
+      item.innerHTML =
+        '<div class="bool-check">' + (val ? '&#10003;' : '') + '</div>' +
+        '<div class="bool-item-label">' + escHtml(m.f.label || m.f.key) + '</div>';
+      wrap.appendChild(item);
+    }
+
+    el.appendChild(wrap);
+  });
+}
+
 // ── Foundation & Layout panel ─────────────────────────────────────────────────
 
 const FOUNDATION_STEPS = [0, 90, 180, 270];
@@ -1026,10 +1133,20 @@ buildRarityPanel();
 buildChamberAdditionsPanel();
 buildFloorplanAdditionsPanel();
 buildFoundationPanel();
+buildSearchPanel();
 showPanel('editor-Core');
 updateBoolCount();
 updateFooter();
 initDropZone();
+
+// Restore sidebar collapsed state
+try {
+  if (localStorage.getItem('bp_sidebar_collapsed') === '1') {
+    document.querySelector('.app').classList.add('sidebar-collapsed');
+    const arrow = document.getElementById('sidebar-arrow');
+    if (arrow) arrow.textContent = '▶';
+  }
+} catch (e) {}
 
 document.addEventListener('click', function (e) {
   if (!e.target.closest('.ss-wrap')) {
@@ -1038,9 +1155,23 @@ document.addEventListener('click', function (e) {
 });
 
 document.addEventListener('keydown', function (e) {
+  // Ctrl+F or / — focus sidebar search
+  const inInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT';
+  if ((e.ctrlKey && e.key === 'f') || (e.key === '/' && !inInput)) {
+    e.preventDefault();
+    const si = document.querySelector('.sidebar-search');
+    if (si) {
+      if (document.querySelector('.app').classList.contains('sidebar-collapsed')) toggleSidebar();
+      si.focus();
+      si.select();
+    }
+    return;
+  }
+
+  // Foundation panel arrow/backspace shortcuts
   var panel = document.getElementById('panel-editor-Foundation & Layout');
   if (!panel || !panel.classList.contains('active')) return;
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (inInput) return;
   if (e.key === 'ArrowLeft') { e.preventDefault(); rotateFoundation(-1); }
   else if (e.key === 'ArrowRight') { e.preventDefault(); rotateFoundation(1); }
   else if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); clearFoundationTile(); }
