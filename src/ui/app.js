@@ -92,7 +92,7 @@ function escHtml(s) {
 function buildEditorPanels() {
   const main = document.getElementById('main-panels');
 
-  const SPECIAL_CAT_PANELS = new Set(['Chamber of Mirrors Additions', 'Floorplan Additions']);
+  const SPECIAL_CAT_PANELS = new Set(['Chamber of Mirrors Additions', 'Floorplan Additions', 'Foundation & Layout']);
 
   // One panel per CATEGORY
   Object.entries(CATEGORIES).forEach(([catName, keys]) => {
@@ -357,6 +357,7 @@ function refreshEditor() {
   refreshRarityPanel();
   refreshChamberPanel();
   refreshFloorplanPanel();
+  refreshFoundationPanel();
   updateBoolCount();
   updateModifiedCounts();
   updateFooter();
@@ -400,6 +401,7 @@ function updateModifiedCounts() {
   updateRarityCount();
   updateChamberCount();
   updateFloorplanCount();
+  updateFoundationCount();
 }
 
 // ── Saved configs ─────────────────────────────────────────────────────────────
@@ -784,6 +786,153 @@ function updateFloorplanCount() {
   if (el) el.textContent = on + ' on';
 }
 
+// ── Foundation & Layout panel ─────────────────────────────────────────────────
+
+const FOUNDATION_STEPS = [0, 90, 180, 270];
+const FOUNDATION_DIR_NAMES = { 0: 'North', 90: 'East', 180: 'South', 270: 'West' };
+const FOUNDATION_DIR_SLUGS = { 0: 'n', 90: 'e', 180: 's', 270: 'w' };
+
+function foundationImgSrc(rotation) {
+  var dir = FOUNDATION_DIR_SLUGS[Math.round(rotation)] || 'w';
+  return 'src/ui/foundation/foundation-' + dir + '.png';
+}
+
+function tileToXZ(tile) {
+  if (!tile || tile < 1 || tile > 45) return null;
+  var col = ((tile - 1) % 5) + 1;
+  var row = Math.ceil(tile / 5);
+  return { x: 5 + col * 10, z: 5 + row * 10 };
+}
+
+function buildFoundationPanel() {
+  const main = document.getElementById('main-panels');
+  const div = document.createElement('div');
+  div.className = 'panel';
+  div.id = 'panel-editor-Foundation & Layout';
+
+  div.innerHTML =
+    '<div class="section-header">' +
+    '<h2>Foundation &amp; Layout</h2>' +
+    '<span class="count" id="foundation-mod-count"></span>' +
+    '</div>' +
+    '<div class="field-grid" id="foundation-bool-grid"></div>' +
+    '<div class="foundation-section-label">Foundation Placement</div>' +
+    '<div class="foundation-rotation-controls">' +
+    '<button class="btn btn-sm" onclick="rotateFoundation(-1)">&#8592; Rotate</button>' +
+    '<span id="foundation-dir-label">West (270°)</span>' +
+    '<button class="btn btn-sm" onclick="rotateFoundation(1)">Rotate &#8594;</button>' +
+    '<button class="btn btn-sm btn-danger" onclick="clearFoundationTile()">&#10005; Clear</button>' +
+    '</div>' +
+    '<div class="foundation-grid" id="foundation-grid"></div>' +
+    '<div class="foundation-coord-label" id="foundation-coord-label">No tile selected</div>';
+
+  main.appendChild(div);
+
+  // Bool toggles (Foundation Accessible is auto-managed by tile placement)
+  const boolGrid = div.querySelector('#foundation-bool-grid');
+  ['FoundationElevator', 'outer foundation'].forEach(function (key) {
+    const f = fieldByKey[key];
+    if (!f) return;
+    const val = getSlotValue(1, key);
+    const item = document.createElement('div');
+    item.className = 'bool-item' + (val ? ' on' : '');
+    item.setAttribute('data-key', key);
+    item.onclick = function () { toggleBool(key); };
+    item.innerHTML =
+      '<div class="bool-check">' + (val ? '&#10003;' : '') + '</div>' +
+      '<div class="bool-item-label">' + escHtml(f.label || f.key) + '</div>';
+    boolGrid.appendChild(item);
+  });
+
+  // 9 rows × 5 cols = 45 tiles.
+  // Render row 9 first (top = north, Z=95) down to row 1 (bottom = south, Z=15)
+  // so the display orientation matches the in-game map.
+  const grid = div.querySelector('#foundation-grid');
+  for (var r = 9; r >= 1; r--) {
+    for (var c = 1; c <= 5; c++) {
+      var i = (r - 1) * 5 + c;
+      var cell = document.createElement('div');
+      cell.className = 'foundation-cell';
+      cell.setAttribute('data-tile', i);
+      cell.setAttribute('title', 'Tile ' + i + ' (X=' + (5 + c * 10) + ', Z=' + (5 + r * 10) + ')');
+      cell.onclick = (function (t) { return function () { handleFoundationCellClick(t); }; })(i);
+      grid.appendChild(cell);
+    }
+  }
+
+  refreshFoundationPanel();
+}
+
+function handleFoundationCellClick(tile) {
+  setSlotValue(1, 'foundaiton tile', tile);
+  setSlotValue(1, 'Foundation', true);
+  refreshFoundationPanel();
+}
+
+function rotateFoundation(dir) {
+  var cur = parseFloat(getSlotValue(1, 'FoundationRotation'));
+  cur = isNaN(cur) ? 270 : Math.round(cur);
+  var idx = FOUNDATION_STEPS.indexOf(cur);
+  if (idx === -1) idx = 3;
+  setSlotValue(1, 'FoundationRotation', FOUNDATION_STEPS[((idx + dir) + 4) % 4]);
+  refreshFoundationPanel();
+}
+
+function clearFoundationTile() {
+  delete slotData['foundaiton tile'];
+  delete slotData['Foundation'];
+  refreshFoundationPanel();
+  updateModifiedCounts();
+  updateFooter();
+}
+
+function refreshFoundationPanel() {
+  var tile = getSlotValue(1, 'foundaiton tile');
+  var rotation = parseFloat(getSlotValue(1, 'FoundationRotation'));
+  rotation = isNaN(rotation) ? 270 : Math.round(rotation);
+  if (FOUNDATION_STEPS.indexOf(rotation) === -1) rotation = 270;
+
+  document.querySelectorAll('#foundation-grid .foundation-cell').forEach(function (cell) {
+    var t = parseInt(cell.getAttribute('data-tile'));
+    var selected = (t === tile);
+    cell.classList.toggle('selected', selected);
+    var img = cell.querySelector('img');
+    if (selected) {
+      if (!img) { img = document.createElement('img'); cell.appendChild(img); }
+      img.src = foundationImgSrc(rotation);
+      img.alt = 'Foundation';
+    } else {
+      if (img) img.remove();
+    }
+  });
+
+  var dirLabel = document.getElementById('foundation-dir-label');
+  if (dirLabel) dirLabel.textContent = (FOUNDATION_DIR_NAMES[rotation] || 'Unknown') + ' (' + rotation + '°)';
+
+  var xz = tileToXZ(tile);
+  var coordLabel = document.getElementById('foundation-coord-label');
+  if (coordLabel) coordLabel.textContent = xz
+    ? 'Tile ' + tile + ' → World X=' + xz.x + ', Z=' + xz.z
+    : 'No tile selected';
+
+  // Sync bool toggles in this panel
+  ['FoundationElevator', 'outer foundation'].forEach(function (key) {
+    var item = document.querySelector('#foundation-bool-grid .bool-item[data-key="' + key + '"]');
+    if (!item) return;
+    var val = getSlotValue(1, key);
+    item.className = 'bool-item' + (val ? ' on' : '');
+    item.querySelector('.bool-check').textContent = val ? '✓' : '';
+  });
+
+  updateFoundationCount();
+}
+
+function updateFoundationCount() {
+  var mods = CATEGORIES['Foundation & Layout'].filter(function (k) { return k in slotData; }).length;
+  var el = document.getElementById('foundation-mod-count');
+  if (el) el.textContent = mods > 0 ? mods + ' ✎' : '';
+}
+
 // ── Downloads ─────────────────────────────────────────────────────────────────
 
 async function downloadEncrypted() {
@@ -876,6 +1025,7 @@ buildEditorPanels();
 buildRarityPanel();
 buildChamberAdditionsPanel();
 buildFloorplanAdditionsPanel();
+buildFoundationPanel();
 showPanel('editor-Core');
 updateBoolCount();
 updateFooter();
@@ -885,6 +1035,15 @@ document.addEventListener('click', function (e) {
   if (!e.target.closest('.ss-wrap')) {
     document.querySelectorAll('.ss-dropdown.open').forEach(d => d.classList.remove('open'));
   }
+});
+
+document.addEventListener('keydown', function (e) {
+  var panel = document.getElementById('panel-editor-Foundation & Layout');
+  if (!panel || !panel.classList.contains('active')) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); rotateFoundation(-1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); rotateFoundation(1); }
+  else if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); clearFoundationTile(); }
 });
 
 // Restore saved installer paths from localStorage
