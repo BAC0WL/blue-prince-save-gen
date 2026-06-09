@@ -20,42 +20,64 @@
     </header>
 
     <aside>
+      <div class="sidebar-search-wrap">
+        <input class="sidebar-search" type="text" placeholder="🔍 Search fields…" autocomplete="off"
+          oninput="handleGlobalSearch(this.value)">
+      </div>
       <div class="tab-section">
         <span class="tab-section-label">Fields</span>
-        <button class="nav-btn" onclick="showPanel('editor-Core')"><span class="icon">🎮</span>Core<span
-            class="nav-count" id="cnt-Core"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Resources')"><span class="icon">💰</span>Resources<span
-            class="nav-count" id="cnt-Resources"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Room Levels')"><span class="icon">🏗</span>Room Levels<span
-            class="nav-count" id="cnt-Room Levels"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Room Upgrades')"><span class="icon">⬆</span>Room
-          Upgrades<span class="nav-count" id="cnt-Room Upgrades"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Trophy Challenges')"><span class="icon">🏆</span>Trophy
-          Challenges<span class="nav-count" id="cnt-Trophy Challenges"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Dare Runs')"><span class="icon">🔥</span>Dare Runs<span
-            class="nav-count" id="cnt-Dare Runs"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Network & Terminal')"><span class="icon">🔐</span>Network
-          &amp; Terminal<span class="nav-count" id="cnt-Network &amp; Terminal"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Parlor Game')"><span class="icon">🃏</span>Parlor Game<span
-            class="nav-count" id="cnt-Parlor Game"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Foundation & Layout')"><span class="icon">🔲</span>Foundation
-          &amp; Layout<span class="nav-count" id="cnt-Foundation &amp; Layout"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Chamber of Mirrors Additions')"><span
-            class="icon">🪞</span>Chamber of Mirrors Additions<span class="nav-count"
+        <button class="nav-btn" title="Core" onclick="showPanel('editor-Core')"><span class="icon">🎮</span><span
+            class="nav-label">Core</span><span class="nav-count" id="cnt-Core"></span></button>
+        <button class="nav-btn" title="Resources" onclick="showPanel('editor-Resources')"><span
+            class="icon">💰</span><span class="nav-label">Resources</span><span class="nav-count"
+            id="cnt-Resources"></span></button>
+        <button class="nav-btn" title="Room Levels" onclick="showPanel('editor-Room Levels')"><span
+            class="icon">🫗</span><span class="nav-label">Room Levels</span><span class="nav-count"
+            id="cnt-Room Levels"></span></button>
+        <button class="nav-btn" title="Room Upgrades" onclick="showPanel('editor-Room Upgrades')"><span
+            class="icon">⬆</span><span class="nav-label">Room Upgrades</span><span class="nav-count"
+            id="cnt-Room Upgrades"></span></button>
+        <button class="nav-btn" title="Trophy Challenges" onclick="showPanel('editor-Trophy Challenges')"><span
+            class="icon">🏆</span><span class="nav-label">Trophy Challenges</span><span class="nav-count"
+            id="cnt-Trophy Challenges"></span></button>
+        <button class="nav-btn" title="Dare Runs" onclick="showPanel('editor-Dare Runs')"><span
+            class="icon">🔥</span><span class="nav-label">Dare Challenges</span><span class="nav-count"
+            id="cnt-Dare Runs"></span></button>
+        <button class="nav-btn" title="Network &amp; Terminal"
+          onclick="showPanel('editor-Network &amp; Terminal')"><span class="icon">🔐</span><span
+            class="nav-label">Network &amp; Terminal</span><span class="nav-count"
+            id="cnt-Network &amp; Terminal"></span></button>
+        <button class="nav-btn" title="Puzzles" onclick="showPanel('editor-Puzzles')"><span class="icon">🧩</span><span
+            class="nav-label">Parlor Game</span><span class="nav-count" id="cnt-Puzzles"></span></button>
+        <button class="nav-btn" title="Foundation &amp; Layout"
+          onclick="showPanel('editor-Foundation &amp; Layout')"><span class="icon">🔲</span><span
+            class="nav-label">Foundation &amp; Layout</span><span class="nav-count"
+            id="cnt-Foundation &amp; Layout"></span></button>
+        <button class="nav-btn" title="Chamber of Mirrors Additions"
+          onclick="showPanel('editor-Chamber of Mirrors Additions')"><span class="icon">🪞</span><span
+            class="nav-label">Chamber of Mirrors</span><span class="nav-count"
             id="cnt-Chamber of Mirrors Additions"></span></button>
-        <button class="nav-btn" onclick="showPanel('editor-Floorplan Additions')"><span class="icon">🛅</span>Floorplan
-          Additions<span class="nav-count" id="cnt-Floorplan Additions"></span></button>
-        <button class="nav-btn" onclick="showPanel('rarity-shifts')"><span class="icon">🎲</span>Rarity Shifts<span
-            class="nav-count" id="cnt-rarity"></span></button>
-        <button class="nav-btn" onclick="showPanel('flags')"><span class="icon">🚩</span>Flags<span class="nav-count"
-            id="cnt-flags"></span></button>
+        <button class="nav-btn" title="Floorplan Additions" onclick="showPanel('editor-Floorplan Additions')"><span
+            class="icon">🛅</span><span class="nav-label">Floorplan Additions</span><span class="nav-count"
+            id="cnt-Floorplan Additions"></span></button>
+        <button class="nav-btn" title="Rarity Shifts" onclick="showPanel('rarity-shifts')"><span
+            class="icon">🎲</span><span class="nav-label">Rarity Shifts</span><span class="nav-count"
+            id="cnt-rarity"></span></button>
+        <button class="nav-btn" title="Flags" onclick="showPanel('flags')"><span class="icon">🚩</span><span
+            class="nav-label">Flags</span><span class="nav-count" id="cnt-flags"></span></button>
       </div>
       <div class="tab-section">
         <span class="tab-section-label">Configure</span>
-        <button class="nav-btn" onclick="showPanel('presets')"><span class="icon">⚡</span>Presets</button>
-        <button class="nav-btn" onclick="showPanel('configs')"><span class="icon">💾</span>Saved Configs</button>
-        <button class="nav-btn" onclick="showPanel('installer')"><span class="icon">⚙</span>Installer</button>
+        <button class="nav-btn" title="Presets" onclick="showPanel('presets')"><span class="icon">⚡</span><span
+            class="nav-label">Presets</span></button>
+        <button class="nav-btn" title="Saved Configs" onclick="showPanel('configs')"><span class="icon">💾</span><span
+            class="nav-label">Saved Configs</span></button>
+        <button class="nav-btn" title="Installer" onclick="showPanel('installer')"><span class="icon">⚙</span><span
+            class="nav-label">Installer</span></button>
       </div>
+      <button class="sidebar-toggle-btn" title="Toggle sidebar" onclick="toggleSidebar()">
+        <span class="icon" id="sidebar-arrow">◀</span><span class="nav-label">Collapse</span>
+      </button>
     </aside>
 
     <main id="main-panels">
@@ -154,7 +176,9 @@
             <div class="installer-field">
               <label class="installer-label" for="installer-game-exe">Blue Prince executable <span
                   class="installer-optional">(optional)</span></label>
-              <p class="installer-hint">Full path to the game .exe — leave blank to skip auto-launch.</p>
+              <p class="installer-hint">Full path to the game .exe e.g.
+                C:\Program Files (x86)\Steam\steamapps\common\Blue Prince\BLUE PRINCE.exe
+                — leave blank to skip auto-launch.</p>
               <input type="text" id="installer-game-exe" class="installer-input"
                 placeholder="C:\Program Files (x86)\Steam\steamapps\common\Blue Prince\Blue Prince.exe"
                 oninput="localStorage.setItem('bp_inst_game', this.value)">
