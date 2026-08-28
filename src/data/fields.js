@@ -315,7 +315,7 @@ const EDITABLE_FIELDS = [
       { "value": "General", "label": "Red General" },
       { "value": "Clockmaker", "label": "Tinkerer" },
       { "value": "Monk", "label": "Monk" },
-      { "value": "Berrypicker", "label": "Berry Picker" },
+      { "value": "Berry Picker", "label": "Berry Picker" },
       { "value": "Curse", "label": "CURSED" },
     ]
   },
