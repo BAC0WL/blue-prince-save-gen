@@ -51,7 +51,12 @@ function buildObjsStr(slot) {
 
   // Write hidden boolean fields (internal game state, always at default)
   HIDDEN_BOOL_FIELDS.forEach(f => {
-    const val = getSlotValue(slot, f.key);
+    let val = getSlotValue(slot, f.key);
+    // "?Checked Item" is set whenever an item is stored in the Coat Check
+    // (CoatCheckIndexNumber is anything other than 1000 = None).
+    if (f.key === '?Checked Item' && getSlotValue(slot, 'CoatCheckIndexNumber') != 1000) {
+      val = true;
+    }
     parts.push('"' + f.key + '":{\n\t\t\t\t"__type" : "System.Boolean"' + (val ? 'true' : 'false') + '\n\t\t\t}');
   });
 

@@ -208,10 +208,10 @@ function buildFieldRow(grid, f) {
     inputHtml =
       '<div class="ss-wrap" id="' + sid + '_wrap">' +
       '<input class="ss-input" type="text" autocomplete="off"' +
-      ' value="' + escHtml(String(val)) + '"' +
+      ' value="' + escHtml(_ssLabel(f, val)) + '"' +
       ' placeholder="Search…"' +
       ' oninput="handleSsInput(\'' + ek + '\', this)"' +
-      ' onfocus="handleSsInput(\'' + ek + '\', this)"' +
+      ' onfocus="handleSsFocus(\'' + ek + '\', this)"' +
       ' onblur="handleSsBlur(\'' + ek + '\', this)">' +
       '<div class="ss-dropdown" id="' + sid + '_drop"></div>' +
       '</div>';
@@ -255,19 +255,34 @@ function handleFieldChange(key, val) {
 
 function _ssid(key) { return 'ss_' + key.replace(/[^a-zA-Z0-9]/g, '_'); }
 
-function handleSsInput(key, input) {
-  const f = fieldByKey[key];
+// Display text for a stored value: the matching option's label, else the raw value.
+function _ssLabel(f, value) {
+  const opt = f.options.find(o => String(o.value) === String(value));
+  return opt ? opt.label : String(value);
+}
+
+function _ssRenderOptions(key, options) {
   const drop = document.getElementById(_ssid(key) + '_drop');
   if (!drop) return;
-  const term = input.value.toLowerCase();
-  const filtered = term ? f.options.filter(o => o.label.toLowerCase().includes(term)) : f.options;
   const ek2 = key.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-  drop.innerHTML = filtered.map(o =>
+  drop.innerHTML = options.map(o =>
     '<div class="ss-option" onmousedown="event.preventDefault();handleSsSelect(\'' + ek2 + '\',\'' +
     String(o.value).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' +
     escHtml(o.label) + '</div>'
   ).join('');
-  drop.classList.toggle('open', filtered.length > 0);
+  drop.classList.toggle('open', options.length > 0);
+}
+
+function handleSsFocus(key, input) {
+  input.select();
+  _ssRenderOptions(key, fieldByKey[key].options);
+}
+
+function handleSsInput(key, input) {
+  const f = fieldByKey[key];
+  const term = input.value.toLowerCase();
+  const filtered = term ? f.options.filter(o => o.label.toLowerCase().includes(term)) : f.options;
+  _ssRenderOptions(key, filtered);
 }
 
 function handleSsBlur(key, input) {
@@ -275,22 +290,27 @@ function handleSsBlur(key, input) {
     const drop = document.getElementById(_ssid(key) + '_drop');
     if (drop) drop.classList.remove('open');
     const f = fieldByKey[key];
-    const match = f.options.find(o => o.value.toLowerCase() === input.value.toLowerCase());
+    const term = input.value.toLowerCase();
+    const match = f.options.find(o => o.label.toLowerCase() === term)
+      || f.options.find(o => String(o.value).toLowerCase() === term);
     if (match) {
       setSlotValue(1, key, match.value);
-      input.value = match.value;
+      input.value = match.label;
       const row = document.querySelector('.field-row[data-key="' + key + '"]');
       if (row) row.className = 'field-row' + (isModified(1, key) ? ' modified' : '');
     } else {
-      input.value = String(getSlotValue(1, key));
+      input.value = _ssLabel(f, getSlotValue(1, key));
     }
   }, 0);
 }
 
-function handleSsSelect(key, value) {
+function handleSsSelect(key, rawValue) {
+  const f = fieldByKey[key];
+  const opt = f.options.find(o => String(o.value) === String(rawValue));
+  const value = opt ? opt.value : rawValue;
   setSlotValue(1, key, value);
   const wrap = document.getElementById(_ssid(key) + '_wrap');
-  if (wrap) wrap.querySelector('.ss-input').value = value;
+  if (wrap) wrap.querySelector('.ss-input').value = opt ? opt.label : String(value);
   const drop = document.getElementById(_ssid(key) + '_drop');
   if (drop) drop.classList.remove('open');
   const row = document.querySelector('.field-row[data-key="' + key + '"]');

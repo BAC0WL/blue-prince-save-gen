@@ -304,7 +304,7 @@ const EDITABLE_FIELDS = [
     ]
   },
   {
-    "key": "CoatCheckIndexNumber", "type": "System.Int32", "value": 1000, "label": "Coat Checked Item", "uiType": "select",
+    "key": "CoatCheckIndexNumber", "type": "System.Int32", "value": 1000, "label": "Coat Checked Item", "uiType": "searchable-select",
     "options": [
       { "value": 1000, "label": "None" },
       { "value": 0, "label": "Basement Key" },
