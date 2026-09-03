@@ -737,6 +737,7 @@ const CATEGORIES = {
   "Core": [
     "DAY",
     "Chess Power",
+    "Castle",
     "RANDOMSEED",
     "ascend",
     "Scepter Picked Up",
@@ -756,8 +757,10 @@ const CATEGORIES = {
     "Blessing Days",
     "sleeproom",
     "allowance",
+    "YesterFreezer",
     "YesterFreezerGold",
     "YesterFreezerGems",
+    "clock tower",
     "clock rooms",
     "YesterSauna",
     "CoatCheckIndexNumber",
@@ -1134,7 +1137,6 @@ const BOOL_FIELDS = [
   { "key": "Vase3Break", "label": "Vase 3 Broken", "value": false },
   { "key": "Vase4Break", "label": "Vase 4 Broken", "value": false },
   { "key": "WrenchUsed", "label": "Wrench Used", "value": false },
-  { "key": "YesterFreezer", "label": "Yesterfreezer Active", "value": false },
   { "key": "YesterMorning", "label": "Yester Morning Active", "value": false },
   { "key": "YesterSauna", "label": "Day 1 Sauna Active", "value": false },
   { "key": "GEAR UP", "label": "Gear Is Up", "value": false },
@@ -1187,6 +1189,7 @@ const RARITY_ROOMS = [
 // Hidden boolean fields — written to the save with fixed defaults, never shown in the UI.
 // These are internal game-state tracking flags extracted from a real save file.
 const HIDDEN_BOOL_FIELDS = [
+  { "key": "YesterFreezer", "label": "Yesterfreezer Active", "value": false },
   { "key": "46v", "value": false },
   { "key": "8 v", "label": "Key 8 Safe", "value": false },
   { "key": "?Addition", "value": false },
