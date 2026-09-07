@@ -540,7 +540,7 @@ function buildRarityPanel() {
     '<h2>Room Rarity Shifts</h2>' +
     '<span class="count" id="rarity-mod-count">0 modified</span>' +
     '</div>' +
-    '<p class="desc-text">Click the colored dots to set each room\'s rarity. Place room images (144×144 PNG) in <code>src/ui/rarity/</code> named after the slug shown on each card. Applied to all 4 slots.</p>' +
+    '<p class="desc-text">Click the colored dots to set each room\'s rarity. </p>' +
     '<button class="btn" style="margin-bottom:16px" onclick="resetAllRarities()">↺ Reset All to Default</button>' +
     '<div class="rarity-grid" id="rarity-grid"></div>';
 
@@ -653,7 +653,7 @@ function buildChamberAdditionsPanel() {
     '<h2>Chamber of Mirrors Additions</h2>' +
     '<span class="count" id="chamber-mod-count">0 modified</span>' +
     '</div>' +
-    '<p class="desc-text">How many times each room has been added to the mirror pool. 0 = not added. Applied to all 4 slots.</p>' +
+    '<p class="desc-text">How many times each room has been added to the mirror pool. 0 = not added.</p>' +
     '<button class="btn" style="margin-bottom:16px" onclick="resetAllChamberAdditions()">&#8635; Reset All to 0</button>' +
     '<div class="rarity-grid" id="chamber-grid"></div>';
 
@@ -733,7 +733,7 @@ function buildFloorplanAdditionsPanel() {
     '<h2>Floorplan Additions</h2>' +
     '<span class="count" id="floorplan-mod-count">0 on</span>' +
     '</div>' +
-    '<p class="desc-text">Toggle which rooms are added to the drafting pool. Click a card to toggle on/off. Applied to all 4 slots.</p>' +
+    '<p class="desc-text">Toggle which rooms are added to the drafting pool. Click a card to toggle on/off.</p>' +
     '<button class="btn" style="margin-bottom:16px" onclick="resetAllFloorplanAdditions()">&#8635; Reset All to Off</button>' +
     '<div class="rarity-grid" id="floorplan-grid"></div>';
 
@@ -819,7 +819,7 @@ function toggleSidebar() {
   const collapsed = document.querySelector('.app').classList.toggle('sidebar-collapsed');
   const arrow = document.getElementById('sidebar-arrow');
   if (arrow) arrow.textContent = collapsed ? '▶' : '◀';
-  try { localStorage.setItem('bp_sidebar_collapsed', collapsed ? '1' : '0'); } catch (e) {}
+  try { localStorage.setItem('bp_sidebar_collapsed', collapsed ? '1' : '0'); } catch (e) { }
 }
 
 // ── Global search ─────────────────────────────────────────────────────────────
@@ -1133,7 +1133,7 @@ function initDropZone() {
 function updateFooter() {
   const total = Object.keys(slotData).length;
   document.getElementById('footer-sub').textContent = total > 0
-    ? total + ' field(s) customized — applied to all 4 slots'
+    ? total + ' field(s) customized'
     : 'No changes yet — all slots use defaults';
 }
 
@@ -1166,7 +1166,7 @@ try {
     const arrow = document.getElementById('sidebar-arrow');
     if (arrow) arrow.textContent = '▶';
   }
-} catch (e) {}
+} catch (e) { }
 
 document.addEventListener('click', function (e) {
   if (!e.target.closest('.ss-wrap')) {
