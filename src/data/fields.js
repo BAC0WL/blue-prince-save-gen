@@ -751,6 +751,7 @@ const CATEGORIES = {
     "Gas Flame - Orchard",
     "Gas Flame - Schoolhouse",
     "Tunnel Crates Removed",
+    "tunnel torches"
   ],
   "Resources": [
     "Blessing",
