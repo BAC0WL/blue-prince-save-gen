@@ -727,8 +727,6 @@ const EDITABLE_FIELDS = [
   { "key": "Darts Solved", "type": "System.Int32", "value": 0, "label": "Billiards Solved", "desc": "How many billiards you've done" },
   { "key": "FoundationRotation", "type": "System.Single", "value": 270.0, "label": "Foundation Rotation (\u00b0)", "desc": "Rotation of the starting foundation tile in degrees. 0, 90, 180, or 270." },
   { "key": "NETWORK PASSWORD", "type": "System.String", "value": "SWANSONG", "label": "Network Password", "desc": "The current password for the network terminal. Default is SWANSONG. Why do they let you change this?" },
-  { "key": "46v", "label": "Ignore 46 Cutscene", "value": false },
-
 ];
 
 // Combined — do not edit this line
@@ -954,6 +952,8 @@ const CATEGORIES = {
 
 // Boolean flags shown in the Flags panel
 const BOOL_FIELDS = [
+  { "key": "46v", "label": "Ignore 46 Cutscene", "value": false },
+
   { "key": "sanctum key 1", "label": "Sanctum Key 1", "value": false },
   { "key": "sanctum key 2", "label": "Sanctum Key 2", "value": false },
   { "key": "sanctum key 3", "label": "Sanctum Key 3", "value": false },
