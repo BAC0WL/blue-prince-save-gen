@@ -137,7 +137,7 @@ const ROOM_OPTIONS = [
 const HIDDEN_FIELDS = [
   { "key": "GAME CLOCK", "type": "System.Single", "value": 0.0, "hidden": true },
   { "key": "GAME CLOCK WIN", "type": "System.Single", "value": 0.0, "hidden": true },
-  { "key": "MineCart", "type": "System.Single", "value": 0.0, "hidden": true },
+  { "key": "MineCart", "label": "Minecart", "desc": "Where the Minecart is (values not tested but if it's really high you can freely access both sides as long as you don't touch the minecart)", "type": "System.Single", "value": 0.0, "hidden": false },
   { "key": "GEAR ROTATE", "type": "System.Single", "value": 0.0, "hidden": true },
   { "key": "longestday", "type": "System.Single", "value": 0.0, "hidden": true },
   { "key": "AVERAGE DAY LENGTH", "type": "System.Single", "value": 0.0, "hidden": true },
@@ -769,7 +769,7 @@ const CATEGORIES = {
     "Blessing",
     "Blessing Days",
     "sleeproom",
-    "totalstars",
+    "TotalStars",
     "allowance",
     "YesterFreezer",
     "YesterFreezerGold",
@@ -808,6 +808,7 @@ const CATEGORIES = {
     "Tank1 - PumpRoom",
     "Tank2 - PumpRoom",
     "Tank3- Pumproom",
+    "MineCart",
   ],
   "Room Upgrades": [
     "Repellent Room 1",
