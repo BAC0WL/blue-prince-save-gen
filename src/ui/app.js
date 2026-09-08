@@ -111,7 +111,17 @@ function buildEditorPanels() {
     main.appendChild(div);
 
     const grid = div.querySelector('.field-grid');
-    catFields.forEach(f => buildFieldRow(grid, f));
+    const groupedKeys = new Set();
+    catFields.forEach(f => {
+      if (groupedKeys.has(f.key)) return;
+      const group = IMAGE_TOGGLE_GROUPS.find(g => g[0] === f.key && g.every(k => keys.includes(k)));
+      if (group) {
+        buildImageToggleRow(grid, group.map(k => fieldByKey[k]));
+        group.forEach(k => groupedKeys.add(k));
+        return;
+      }
+      buildFieldRow(grid, f);
+    });
   });
 
   // Flags panel — skip bools already shown in a category section
@@ -230,6 +240,40 @@ function buildFieldRow(grid, f) {
     '</div>' +
     '<div class="field-input-wrap">' + inputHtml + '</div>';
   grid.appendChild(row);
+}
+
+// A row of image-card toggles for a set of related boolean fields (see
+// IMAGE_TOGGLE_GROUPS in fields.js). Cards match the sizing/look of the
+// Rarity Shifts panel; click anywhere on a card to flip it on/off.
+function buildImageToggleRow(grid, fields) {
+  const row = document.createElement('div');
+  row.className = 'rarity-grid image-toggle-row';
+  fields.forEach(f => {
+    const val = getSlotValue(1, f.key);
+    const card = document.createElement('div');
+    card.className = 'rarity-card addition-toggle' + (val ? ' addition-on' : '');
+    card.setAttribute('data-key', f.key);
+    card.onclick = () => toggleImageToggle(f.key);
+    card.innerHTML =
+      '<div class="rarity-img-wrap">' +
+      '<img src="src/ui/core/' + f.imgSlug + '.webp" alt="' + escHtml(f.label) + '" onerror="this.classList.add(\'broken\')">' +
+      '</div>' +
+      '<div class="rarity-room-name">' + escHtml(f.label) + '</div>' +
+      '<div class="addition-toggle-label">' + (val ? 'ON' : 'OFF') + '</div>';
+    row.appendChild(card);
+  });
+  grid.appendChild(row);
+}
+
+function toggleImageToggle(key) {
+  const newVal = !getSlotValue(1, key);
+  setSlotValue(1, key, newVal);
+  const card = document.querySelector('.image-toggle-row .rarity-card[data-key="' + key + '"]');
+  if (card) {
+    card.classList.toggle('addition-on', !!newVal);
+    const lbl = card.querySelector('.addition-toggle-label');
+    if (lbl) lbl.textContent = newVal ? 'ON' : 'OFF';
+  }
 }
 
 function handleUpgradePick(key, val) {

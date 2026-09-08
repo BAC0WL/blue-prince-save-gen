@@ -461,6 +461,12 @@ label.file-label:hover { background: var(--bg3); color: var(--text); }
 
 .upgrade-option-label { display: none; }
 
+/* Image-toggle rows embedded inside a regular field-grid (e.g. Core panel) */
+.field-grid > .image-toggle-row {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 10px; margin: 2px 0;
+}
+
 /* ── Rarity Shifts panel ─────────────────────────────────────────────────────── */
 
 .rarity-grid {

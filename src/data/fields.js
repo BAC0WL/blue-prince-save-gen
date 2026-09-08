@@ -727,10 +727,20 @@ const EDITABLE_FIELDS = [
   { "key": "Darts Solved", "type": "System.Int32", "value": 0, "label": "Billiards Solved", "desc": "How many billiards you've done" },
   { "key": "FoundationRotation", "type": "System.Single", "value": 270.0, "label": "Foundation Rotation (\u00b0)", "desc": "Rotation of the starting foundation tile in degrees. 0, 90, 180, or 270." },
   { "key": "NETWORK PASSWORD", "type": "System.String", "value": "SWANSONG", "label": "Network Password", "desc": "The current password for the network terminal. Default is SWANSONG. Why do they let you change this?" },
+  { "key": "46v", "label": "Ignore 46 Cutscene", "value": false },
+
 ];
 
 // Combined — do not edit this line
 const ALL_FIELDS = [...HIDDEN_FIELDS, ...EDITABLE_FIELDS];
+
+// Groups of boolean fields rendered as a row of image cards (instead of plain
+// checkbox rows) inside their category panel. Each key must appear in that
+// category's field list (consecutively, for a clean row) and have an
+// `imgSlug` set on its BOOL_FIELDS entry, matching src/ui/core/<imgSlug>.png.
+const IMAGE_TOGGLE_GROUPS = [
+  ["West Gate Open", "Apple Orchard Open", "Gemstone Cavern Open", "Grotto Open", "Satellite"],
+];
 
 // Which fields appear in each sidebar section (and in what order)
 const CATEGORIES = {
@@ -741,6 +751,7 @@ const CATEGORIES = {
     "Poem Check",
     "RANDOMSEED",
     "ascend",
+    "46v",
     "Scepter Picked Up",
     "West Gate Open",
     "Apple Orchard Open",
@@ -825,7 +836,7 @@ const CATEGORIES = {
     "Upgrade Storeroom",
     "Upgrade Tally",
   ],
-  "Trophy Challenges": [
+  "Trophies": [
     "Trophy Day1",
     "Trophy Explorers",
     "Trophy Speed",
@@ -841,21 +852,6 @@ const CATEGORIES = {
     "Trophy Invention",
     "Trophy Logical",
     "Trophy 8",
-    "TDay Day1",
-    "TDay Explorers",
-    "TDay Speed",
-    "TDay Wealth",
-    "TDay Trophies",
-    "TDay Sigils",
-    "TDay Cursed",
-    "TDay Fullhouse",
-    "TDay Diploma",
-    "TDay Darebird",
-    "TDay Bullseye",
-    "TDay Inheritance",
-    "TDay Invention",
-    "Tday Logical",
-    "TDay 8",
     "TCount Explorers",
     "TCount Sigils",
     "TCount Room8 Puzzles",
@@ -957,7 +953,6 @@ const CATEGORIES = {
 
 // Boolean flags shown in the Flags panel
 const BOOL_FIELDS = [
-  { "key": "?Blessing", "value": false, "label": "Active Blessing" },
   { "key": "sanctum key 1", "label": "Sanctum Key 1", "value": false },
   { "key": "sanctum key 2", "label": "Sanctum Key 2", "value": false },
   { "key": "sanctum key 3", "label": "Sanctum Key 3", "value": false },
@@ -1007,16 +1002,16 @@ const BOOL_FIELDS = [
   { "key": "Dare Mode Complete", "label": "Dare Mode Complete", "value": false },
   { "key": "Cloister Opened", "label": "Cloister Opened", "value": false },
   { "key": "GateOpen", "label": "Main Gate Open", "value": false },
-  { "key": "West Gate Open", "label": "West Gate Open", "value": false },
+  { "key": "West Gate Open", "label": "West Gate Open", "value": false, "imgSlug": "west-gate-open" },
   { "key": "Outer Room Unlocked", "label": "Outer Room Unlocked", "value": false },
   { "key": "CaveDoorOpen", "label": "Cave Door Open", "value": false },
-  { "key": "Gemstone Cavern Open", "label": "Gemstone Cavern Open", "value": false },
-  { "key": "Grotto Open", "label": "Grotto Open", "value": false },
+  { "key": "Gemstone Cavern Open", "label": "Gemstone Cavern Open", "value": false, "imgSlug": "gemstone-cavern-open" },
+  { "key": "Grotto Open", "label": "Grotto Open", "value": false, "imgSlug": "grotto-open" },
   { "key": "Precipice Door", "label": "Precipice Door Open", "value": false },
   { "key": "Foundation", "label": "Foundation Accessible", "value": false },
   { "key": "FoundationElevator", "label": "Foundation Elevator Active", "value": false },
   { "key": "Sundial Open", "label": "Sundial Open", "value": false },
-  { "key": "Apple Orchard Open", "label": "Apple Orchard Open", "value": false },
+  { "key": "Apple Orchard Open", "label": "Apple Orchard Open", "value": false, "imgSlug": "apple-orchard-open" },
   { "key": "Boiler A On", "label": "Boiler A: On", "value": false },
   { "key": "Boiler B On", "label": "Boiler B: On", "value": false },
   { "key": "Boiler C On", "label": "Boiler C: On", "value": false },
@@ -1073,7 +1068,7 @@ const BOOL_FIELDS = [
   { "key": "Scepter Picked Up", "label": "Scepter Picked Up", "value": false },
   { "key": "PoolGoldPickedUp", "label": "Pool Gold Picked Up", "value": false },
   { "key": "Morning Star", "label": "Morning Star Collected", "value": false },
-  { "key": "Satellite", "label": "Satellite Activated", "value": false },
+  { "key": "Satellite", "label": "Satellite Activated", "value": false, "imgSlug": "satellite" },
   { "key": "DATA PACKET", "label": "Data Packet Found", "value": false },
   { "key": "a new clue", "label": "New Clue Available", "value": false },
   { "key": "Upgrade Disc - Archives", "label": "Upgrade Disc: Archives", "value": false },
@@ -1193,12 +1188,12 @@ const RARITY_ROOMS = [
 // These are internal game-state tracking flags extracted from a real save file.
 const HIDDEN_BOOL_FIELDS = [
   { "key": "YesterFreezer", "label": "Yesterfreezer Active", "value": false },
-  { "key": "46v", "value": false },
   { "key": "8 v", "label": "Key 8 Safe", "value": false },
   { "key": "?Addition", "value": false },
   { "key": "?Allowance", "value": false },
   { "key": "?Archived Floorplan", "value": false },
   { "key": "?Blackprint", "value": false },
+  { "key": "?Blessing", "value": false },
   { "key": "?Checked Item", "value": false },
   { "key": "?Contraption", "value": false },
   { "key": "?Dig", "value": false },
