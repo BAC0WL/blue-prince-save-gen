@@ -111,6 +111,8 @@ function buildEditorPanels() {
     main.appendChild(div);
 
     const grid = div.querySelector('.field-grid');
+    if (catName === 'Puzzles') buildBoilerSolvedRow(grid);
+
     const groupedKeys = new Set();
     catFields.forEach(f => {
       if (groupedKeys.has(f.key)) return;
@@ -375,6 +377,72 @@ function updateBoolCount() {
   const on = BOOL_FIELDS.filter(f => !BOOLS_IN_CATEGORIES.has(f.key) && getSlotValue(1, f.key)).length;
   const el = document.getElementById('flags-on-count');
   if (el) el.textContent = on + ' on';
+}
+
+// ── Boiler Room puzzle preset ────────────────────────────────────────────────
+// A single toggle that applies (or reverts) the full "solved" state for the
+// Boiler Room puzzle across its several underlying fields. Rendered as a
+// bool-item row like any other checkbox, using a synthetic (non-field) key
+// so its on/off state doesn't get written to the save on its own.
+
+const BOILER_SOLVED_KEY = '_Boiler Solved';
+const BOILER_SOLVED_VALUES = {
+  'Boiler A On': true,
+  'Boiler B Lever': false,
+  'Boiler B On': true,
+  'Boiler C Lever': true,
+  'Boiler C On': true,
+  'Boiler Gate Up': true,
+  'Boiler Switcher 1': true,
+  'Boiler Switcher 2': 3,
+};
+
+function buildBoilerSolvedRow(grid) {
+  const val = getSlotValue(1, BOILER_SOLVED_KEY);
+  const row = document.createElement('div');
+  row.className = 'bool-item' + (val ? ' on' : '');
+  row.setAttribute('data-key', BOILER_SOLVED_KEY);
+  row.onclick = () => toggleBoilerSolved();
+  row.innerHTML =
+    '<div class="bool-check">' + (val ? '✓' : '') + '</div>' +
+    '<div class="bool-item-label">Boiler Solved</div>';
+  grid.appendChild(row);
+}
+
+function toggleBoilerSolved() {
+  const newVal = !getSlotValue(1, BOILER_SOLVED_KEY);
+  // Synthetic key — track on/off directly rather than via setSlotValue,
+  // whose default-based delete logic doesn't apply to non-field keys.
+  if (newVal) {
+    slotData[BOILER_SOLVED_KEY] = true;
+  } else {
+    delete slotData[BOILER_SOLVED_KEY];
+  }
+
+  Object.entries(BOILER_SOLVED_VALUES).forEach(([key, solvedVal]) => {
+    // ON → apply the solved value. OFF → revert to that field's default.
+    setSlotValue(1, key, newVal ? solvedVal : getDefault(key));
+    const fieldVal = getSlotValue(1, key);
+    document.querySelectorAll('.bool-item[data-key="' + key + '"]').forEach(item => {
+      item.className = 'bool-item' + (fieldVal ? ' on' : '');
+      const check = item.querySelector('.bool-check');
+      if (check) check.textContent = fieldVal ? '✓' : '';
+    });
+    document.querySelectorAll('.field-row[data-key="' + key + '"]').forEach(row => {
+      row.className = 'field-row' + (isModified(1, key) ? ' modified' : '');
+      const input = row.querySelector('input');
+      if (input) input.value = fieldVal;
+    });
+  });
+
+  document.querySelectorAll('.bool-item[data-key="' + BOILER_SOLVED_KEY + '"]').forEach(item => {
+    item.className = 'bool-item' + (newVal ? ' on' : '');
+    const check = item.querySelector('.bool-check');
+    if (check) check.textContent = newVal ? '✓' : '';
+  });
+
+  updateBoolCount();
+  toast(newVal ? 'Boiler Room puzzle set to solved' : 'Boiler Room puzzle reset to default');
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────

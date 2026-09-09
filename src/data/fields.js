@@ -626,6 +626,7 @@ const EDITABLE_FIELDS = [
       { "value": "Storeroom", "label": "Storeroom" },
       { "value": "Study", "label": "Study" },
       { "value": "Terrace", "label": "Terrace" },
+      { "value": "The Armory", "label": "The Armory" },
       { "value": "The Foundation", "label": "The Foundation" },
       { "value": "The Kennel", "label": "The Kennel" },
       { "value": "The Pool", "label": "The Pool" },
