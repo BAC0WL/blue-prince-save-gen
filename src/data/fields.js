@@ -136,7 +136,7 @@ const ROOM_OPTIONS = [
 // Hidden passthrough fields — written to the save but not shown in the UI.
 // Edit value: to change the fixed default. Do not remove entries.
 const HIDDEN_FIELDS = [
-  { "key": "GAME CLOCK", "type": "System.Single", "value": 0.0, "hidden": true },
+  { "key": "GAME CLOCK", "type": "System.Single", "value": 0.0, "hidden": false },
   { "key": "GAME CLOCK WIN", "type": "System.Single", "value": 0.0, "hidden": true },
   { "key": "MineCart", "label": "Minecart", "desc": "Where the Minecart is (values not tested but if it's really high you can freely access both sides as long as you don't touch the minecart)", "type": "System.Single", "value": 0.0, "hidden": false },
   { "key": "GEAR ROTATE", "type": "System.Single", "value": 0.0, "hidden": true },
@@ -148,7 +148,7 @@ const HIDDEN_FIELDS = [
   { "key": "LIFTER A - trackposition", "type": "System.Single", "value": 0.664, "hidden": true },
   { "key": "LIFTER B - trackposition", "type": "System.Single", "value": 1.0, "hidden": true },
   { "key": "Alever Music Event", "type": "System.Int32", "value": 0, "hidden": true },
-  { "key": "AnneRepellentWait", "type": "System.Int32", "value": 0, "hidden": true },
+  { "key": "AnneRepellentWait", "type": "System.Int32", "value": 0, "hidden": false },
   { "key": "Antechamber Music Event", "type": "System.Int32", "value": 0, "hidden": true },
   { "key": "Aquarium Added", "type": "System.Int32", "value": 0 },
   { "key": "Archives Music Event", "type": "System.Int32", "value": 0, "hidden": true },
@@ -218,7 +218,7 @@ const HIDDEN_FIELDS = [
   { "key": "Still Book 2", "type": "System.Int32", "value": 0, "hidden": true },
   { "key": "Still Book 3", "type": "System.Int32", "value": 0, "hidden": true },
   { "key": "Storeroom Added", "type": "System.Int32", "value": 0 },
-  { "key": "The Dead End Record", "type": "System.Int32", "value": 20, "hidden": true },
+  { "key": "The Dead End Record", "desc": "How many Dead Ends for Sweepstakes Trophy", "type": "System.Int32", "value": 20, "hidden": false },
   { "key": "TheStandaloneRoomDraftedToday", "type": "System.Int32", "value": 100, "hidden": true },
   { "key": "Time Lock Date", "type": "System.Int32", "value": 1, "hidden": true },
   { "key": "Time Lock Hour", "type": "System.Int32", "value": 1, "hidden": true },
@@ -283,7 +283,7 @@ const HIDDEN_FIELDS = [
   { "key": "PROPHECY", "type": "System.Int32", "value": 0, "hidden": true },
   { "key": "TCount Derigiblocks", "type": "System.Int32", "value": 0, "hidden": true },
   { "key": "TDay Derigi", "type": "System.Int32", "value": 0, "hidden": true },
-  { "key": "Troves", "type": "System.Int32", "value": 1, "hidden": true },
+  { "key": "Troves", "type": "System.Int32", "value": 0, "hidden": true },
   { "key": "Time Lock Month", "type": "System.String", "value": "JANUARY", "hidden": true },
 ];
 
@@ -856,6 +856,7 @@ const CATEGORIES = {
     "TCount Explorers",
     "TCount Sigils",
     "TCount Room8 Puzzles",
+    "The Dead End Record",
   ],
   "Dare Runs": [
     "Dare Number",
@@ -1202,8 +1203,9 @@ const BOOL_FIELDS = [
   { "key": "stampseen nuance", "label": "Stamp Seen", "value": false },
   { "key": "stampseen orinda aries", "label": "Stamp Seen", "value": false },
   { "key": "stampseen verra", "label": "Stamp Seen", "value": false },
-  { "key": "dead end contest read", "label": "", "value": false },
+  { "key": "dead end contest read", "label": "Dead End Contest Read", "value": false },
   { "key": "securitydrafted", "label": "Security Cutscene", "value": false },
+  { "key": "antechamber entered", "label": "Antechamber Cutscene", "value": false },
 ];
 
 // Ordered room list for Rarity Shifts (must match the order in save_template ARRAYS_TEMPLATE).
@@ -1232,6 +1234,7 @@ const RARITY_ROOMS = [
 const HIDDEN_BOOL_FIELDS = [
   { "key": "YesterFreezer", "label": "Yesterfreezer Active", "value": false },
   { "key": "8 v", "label": "Key 8 Safe", "value": false },
+  //Fields for terminal definitions
   { "key": "?Addition", "value": false },
   { "key": "?Allowance", "value": false },
   { "key": "?Archived Floorplan", "value": false },
@@ -1325,9 +1328,7 @@ const HIDDEN_BOOL_FIELDS = [
   { "key": "Trophy Full House Not Picked Up", "value": false },
   { "key": "Trophy Invention Not Picked Up", "value": false },
   { "key": "Trophy Logical Not Picked Up", "value": false },
-  { "key": "antechamber entered", "value": false },
   { "key": "clock tower", "value": false },
-
   { "key": "dirigiblocks console edition", "value": false },
   { "key": "first lit darkroom", "value": false },
   { "key": "tunnel torches", "value": false },
