@@ -380,10 +380,6 @@ function updateBoolCount() {
 }
 
 // ── Boiler Room puzzle preset ────────────────────────────────────────────────
-// A single toggle that applies (or reverts) the full "solved" state for the
-// Boiler Room puzzle across its several underlying fields. Rendered as a
-// bool-item row like any other checkbox, using a synthetic (non-field) key
-// so its on/off state doesn't get written to the save on its own.
 
 const BOILER_SOLVED_KEY = '_Boiler Solved';
 const BOILER_SOLVED_VALUES = {

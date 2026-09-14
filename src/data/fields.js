@@ -136,7 +136,7 @@ const ROOM_OPTIONS = [
 // Hidden passthrough fields — written to the save but not shown in the UI.
 // Edit value: to change the fixed default. Do not remove entries.
 const HIDDEN_FIELDS = [
-  { "key": "GAME CLOCK", "type": "System.Single", "value": 0.0, "hidden": false },
+  { "key": "GAME CLOCK", "label": "Time Played", "desc": "For stuff like Antechamber Lever Experiment", "type": "System.Single", "value": 0.0, "hidden": false },
   { "key": "GAME CLOCK WIN", "type": "System.Single", "value": 0.0, "hidden": true },
   { "key": "MineCart", "label": "Minecart", "desc": "Where the Minecart is (values not tested but if it's really high you can freely access both sides as long as you don't touch the minecart)", "type": "System.Single", "value": 0.0, "hidden": false },
   { "key": "GEAR ROTATE", "type": "System.Single", "value": 0.0, "hidden": true },
@@ -180,7 +180,7 @@ const HIDDEN_FIELDS = [
   { "key": "Gymnasium Added", "type": "System.Int32", "value": 0 },
   { "key": "Laboratory Added", "type": "System.Int32", "value": 0 },
   { "key": "Ladyships Music Event", "type": "System.Int32", "value": 0, "hidden": true },
-  { "key": "LettersDelivered", "type": "System.Int32", "value": 0, "hidden": true },
+  { "key": "LettersDelivered", "label": "Mail Room Letters", "type": "System.Int32", "value": 0, "hidden": false },
   { "key": "Library Added", "type": "System.Int32", "value": 0 },
   { "key": "Library Request", "type": "System.Int32", "value": 0, "hidden": true },
   { "key": "Long Direction", "type": "System.Int32", "value": 0, "hidden": true },
@@ -283,7 +283,7 @@ const HIDDEN_FIELDS = [
   { "key": "PROPHECY", "type": "System.Int32", "value": 0, "hidden": true },
   { "key": "TCount Derigiblocks", "type": "System.Int32", "value": 0, "hidden": true },
   { "key": "TDay Derigi", "type": "System.Int32", "value": 0, "hidden": true },
-  { "key": "Troves", "type": "System.Int32", "value": 0, "hidden": true },
+  { "key": "Troves", "label": "Number of Troves (for coins)", "type": "System.Int32", "value": 0, "hidden": false },
   { "key": "Time Lock Month", "type": "System.String", "value": "JANUARY", "hidden": true },
 ];
 
@@ -762,8 +762,10 @@ const CATEGORIES = {
     "Gas Flame - Hovel",
     "Gas Flame - Orchard",
     "Gas Flame - Schoolhouse",
+    "GAME CLOCK",
     "Tunnel Crates Removed",
-    "tunnel torches"
+    "tunnel torches",
+    "Full Directory"
   ],
   "Resources": [
     "Blessing",
@@ -785,7 +787,9 @@ const CATEGORIES = {
     "Magnet Keys",
     "Offering",
     "Main Course Buff",
+    "LettersDelivered",
     "Tithes",
+    "Troves",
     "Sanctum Key Moon",
     "Hidden Riddle",
     "The Axe Uses",
@@ -1206,6 +1210,10 @@ const BOOL_FIELDS = [
   { "key": "dead end contest read", "label": "Dead End Contest Read", "value": false },
   { "key": "securitydrafted", "label": "Security Cutscene", "value": false },
   { "key": "antechamber entered", "label": "Antechamber Cutscene", "value": false },
+
+  // Toggles all room records to 1. Not actually a line to save file
+
+  { "key": "Full Directory", "label": "Full Directory (doesn't work for Nook, Utility Closet, Foundation yet)", "desc": "Makes every room drafted once, Currently does not work for Nook, Utility Closet, Foundation.", "value": false, "synthetic": true },
 ];
 
 // Ordered room list for Rarity Shifts (must match the order in save_template ARRAYS_TEMPLATE).
@@ -1262,6 +1270,7 @@ const HIDDEN_BOOL_FIELDS = [
   { "key": "?Underground", "value": false },
   { "key": "?Upgrade", "value": false },
   { "key": "?West Path", "value": false },
+  //other stuff (half isnt actually hidden i am just not moving it)
   { "key": "Boiler Switcher 1", "value": false },
   { "key": "Cloister Letter Read", "value": false },
   { "key": "Closed Exhibit Added", "value": false },
@@ -1283,6 +1292,7 @@ const HIDDEN_BOOL_FIELDS = [
   { "key": "LIFTER A - up", "value": false },
   { "key": "LIFTER B - up", "value": false },
   { "key": "Load Complete", "value": false },
+  //resevoir memos
   { "key": "MEMOBLUE1", "value": false },
   { "key": "MEMOBLUE2", "value": false },
   { "key": "MEMOBLUE3", "value": false },

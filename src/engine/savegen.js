@@ -1,19 +1,4 @@
-// =============================================================================
-// SAVEGEN.JS  —  Builds the decrypted ES3 save file text
-//
-// The output of generateSaveFile() is a plain-text string in the ES3 format
-// that Blue Prince expects. It is NOT yet encrypted — pass it to es3Encrypt()
-// in encrypt.js before writing to disk or downloading.
-//
-// Key facts about the ES3 format used by Blue Prince:
-//   - Non-standard JSON: values sit directly after the "__type" string with
-//     no separating colon, e.g.  "__type" : "System.Int32"42
-//   - The file wraps four slot sections (BluePrint, BluePrint2, BluePrint3,
-//     BluePrint4), each followed by SaveFileInfo and CurrentSave sections.
-//   - SaveSlot and SaveIcon are always forced to equal the slot number (1-4).
-//   - The arrays block (History Data etc.) is preserved verbatim from a real
-//     save and lives in src/data/save_template.js.
-// =============================================================================
+
 
 // getSlotValue and isModified are defined in app.js and used here.
 // ALL_FIELDS, BOOL_FIELDS, ARRAYS_TEMPLATE, SLOT_FOOTER are in data files.
@@ -43,8 +28,10 @@ function buildObjsStr(slot) {
     parts.push('"' + f.key + '":{\n\t\t\t\t"__type" : "' + f.type + '"' + valStr + '\n\t\t\t}');
   });
 
-  // Write user-editable boolean fields (shown in Flags panel)
+  // Write user-editable boolean fields (shown in Flags panel).
+  // Synthetic fields (e.g. "Full Directory") aren't real save keys — skip them.
   BOOL_FIELDS.forEach(f => {
+    if (f.synthetic) return;
     const val = getSlotValue(slot, f.key);
     parts.push('"' + f.key + '":{\n\t\t\t\t"__type" : "System.Boolean"' + (val ? 'true' : 'false') + '\n\t\t\t}');
   });
@@ -81,15 +68,15 @@ function buildObjsStr(slot) {
     var e, s, w;
     if (tile >= 1 && tile <= 45) {
       var north = 'Tile ' + (tile + 5);
-      var east  = 'Tile ' + (tile + 1);
+      var east = 'Tile ' + (tile + 1);
       var south = 'Tile ' + (tile - 5);
-      var west  = 'Tile ' + (tile - 1);
+      var west = 'Tile ' + (tile - 1);
       var rawRot = parseFloat(getSlotValue(slot, 'FoundationRotation'));
       var rot = isNaN(rawRot) ? 270 : Math.round(rawRot);
-      if      (rot === 0)   { e = east;  s = south; w = west;  }
-      else if (rot === 90)  { e = north; s = east;  w = south; }
-      else if (rot === 180) { e = west;  s = north; w = east;  }
-      else                  { e = south; s = west;  w = north; } // 270
+      if (rot === 0) { e = east; s = south; w = west; }
+      else if (rot === 90) { e = north; s = east; w = south; }
+      else if (rot === 180) { e = west; s = north; w = east; }
+      else { e = south; s = west; w = north; } // 270
     } else {
       e = 'Tile 38'; s = 'Tile 34'; w = 'Tile 28'; // original defaults (tile 33, rot 90)
     }
@@ -109,11 +96,38 @@ function buildRarityValuesStr(slot) {
   }).join(',\n');
 }
 
+// "Full Directory" toggle — forces every entry in "RoomRecords Values"
+// (lifetime per-room draft counts) to 1, matching however many entries the
+// template actually has, so every room reads as drafted at least once.
+function buildRoomRecordsValuesStr(count) {
+  const rows = [];
+  for (let i = 0; i < count; i++) {
+    rows.push('\t\t\t\t{\n\t\t\t\t\t"__type" : "System.Int32"1\n\t\t\t\t}');
+  }
+  return rows.join(',\n');
+}
+
+function buildArraysStr(slot) {
+  let str = ARRAYS_TEMPLATE.replace(
+    /"Rarity Shifts Values":\[[\s\S]*?\]/,
+    '"Rarity Shifts Values":[\n' + buildRarityValuesStr(slot) + '\n\t\t\t]'
+  );
+
+  if (getSlotValue(slot, 'Full Directory')) {
+    str = str.replace(/"RoomRecords Values":\[[\s\S]*?\]/, match => {
+      const count = (match.match(/"__type"/g) || []).length;
+      return '"RoomRecords Values":[\n' + buildRoomRecordsValuesStr(count) + '\n\t\t\t]';
+    });
+  }
+
+  return str;
+}
+
 function buildSlotSection(slot) {
   const bpKey = slot === 1 ? 'BluePrint' : 'BluePrint' + slot;
-  const now   = new Date().toISOString().replace('T', ' ').slice(0, 19);
-  const day   = getSlotValue(slot, 'DAY') || 0;
-  const icon  = slot; // SaveIcon always equals slot number
+  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  const day = getSlotValue(slot, 'DAY') || 0;
+  const icon = slot; // SaveIcon always equals slot number
 
   const objsStr = buildObjsStr(slot);
 
@@ -139,7 +153,7 @@ function buildSlotSection(slot) {
     '\t},',    // trailing comma separates SaveFileInfo from CurrentSave
   ].join('\n');
 
-  // CurrentSave — the lightweight runtime slot that the game reads first
+  // CurrentSave
   const currentSave = [
     '\t"CurrentSave" : {',
     '\t\t"__type" : "ES3PlayMaker.PMDataWrapper,Assembly-CSharp-firstpass",',
@@ -198,10 +212,7 @@ function buildSlotSection(slot) {
     '\t\t"value" : {',
     '\t\t"objs" : {' + objsStr,
     '\t\t},',
-    ARRAYS_TEMPLATE.replace(
-      /"Rarity Shifts Values":\[[\s\S]*?\]/,
-      '"Rarity Shifts Values":[\n' + buildRarityValuesStr(slot) + '\n\t\t\t]'
-    ) + SLOT_FOOTER,
+    buildArraysStr(slot) + SLOT_FOOTER,
     saveInfo,
     currentSave,
   ].join('\n');
