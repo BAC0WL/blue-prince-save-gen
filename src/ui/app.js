@@ -489,6 +489,32 @@ function refreshEditor() {
     }
   });
 
+  // HIDDEN_BOOL_FIELDS aren't shown in the Flags panel, but a few (e.g. the
+  // Gas Flame toggles) are pulled into a category via CATEGORIES and render
+  // as .bool-item rows there — keep those in sync too.
+  HIDDEN_BOOL_FIELDS.forEach(f => {
+    const val = getSlotValue(1, f.key);
+    const item = document.querySelector('.bool-item[data-key="' + f.key + '"]');
+    if (item) {
+      item.className = 'bool-item' + (val ? ' on' : '');
+      const chk = item.querySelector('.bool-check');
+      if (chk) chk.textContent = val ? '✓' : '';
+    }
+  });
+
+  // IMAGE_TOGGLE_GROUPS fields (West Gate Open, Apple Orchard Open, etc.)
+  // render as .rarity-card.addition-toggle cards, not .bool-item rows —
+  // the loops above never touch them, so sync them separately.
+  IMAGE_TOGGLE_GROUPS.forEach(group => group.forEach(key => {
+    const val = getSlotValue(1, key);
+    const card = document.querySelector('.image-toggle-row .rarity-card[data-key="' + key + '"]');
+    if (card) {
+      card.classList.toggle('addition-on', !!val);
+      const lbl = card.querySelector('.addition-toggle-label');
+      if (lbl) lbl.textContent = val ? 'ON' : 'OFF';
+    }
+  }));
+
   refreshRarityPanel();
   refreshChamberPanel();
   refreshFloorplanPanel();
