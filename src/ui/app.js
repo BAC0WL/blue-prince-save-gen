@@ -2,7 +2,7 @@
 // APP.JS  —  UI state management, rendering, and user interactions
 //
 // Depends on (loaded before this file in index.html):
-//   src/data/fields.js        → ALL_FIELDS, CATEGORIES, BOOL_FIELDS
+//   src/data/fields.js        → ALL_FIELDS, CATEGORIES, BOOL_FIELDS, DATA_PACKET_FIELDS
 //   src/data/save_template.js → ARRAYS_TEMPLATE, SLOT_FOOTER
 //   src/engine/savegen.js     → generateSaveFile, buildSlotSection
 //   src/engine/encrypt.js     → es3Encrypt
@@ -25,6 +25,7 @@ const fieldByKey = {};
 ALL_FIELDS.forEach(f => { fieldByKey[f.key] = f; });
 BOOL_FIELDS.forEach(f => { fieldByKey[f.key] = f; });
 HIDDEN_BOOL_FIELDS.forEach(f => { fieldByKey[f.key] = f; });
+DATA_PACKET_FIELDS.forEach(f => { fieldByKey[f.key] = f; });
 
 // Bool keys that appear in a named category section (not in the Flags panel)
 const BOOLS_IN_CATEGORIES = new Set(
@@ -92,7 +93,7 @@ function escHtml(s) {
 function buildEditorPanels() {
   const main = document.getElementById('main-panels');
 
-  const SPECIAL_CAT_PANELS = new Set(['Chamber of Mirrors Additions', 'Floorplan Additions', 'Foundation & Layout']);
+  const SPECIAL_CAT_PANELS = new Set(['Chamber of Mirrors Additions', 'Floorplan Additions', 'Foundation & Layout', 'Data Packet']);
 
   // One panel per CATEGORY
   Object.entries(CATEGORIES).forEach(([catName, keys]) => {
@@ -519,6 +520,7 @@ function refreshEditor() {
   refreshChamberPanel();
   refreshFloorplanPanel();
   refreshFoundationPanel();
+  refreshDataPacketPanel();
   updateBoolCount();
   updateModifiedCounts();
   updateFooter();
@@ -563,6 +565,7 @@ function updateModifiedCounts() {
   updateChamberCount();
   updateFloorplanCount();
   updateFoundationCount();
+  updateDataPacketCount();
 }
 
 // ── Saved configs ─────────────────────────────────────────────────────────────
@@ -1089,7 +1092,7 @@ function buildFoundationPanel() {
 
   main.appendChild(div);
 
-  // Bool toggles (Foundation Accessible is auto-managed by tile placement)
+  // Bool toggles (Foundation Accessible is auto-managed)
   const boolGrid = div.querySelector('#foundation-bool-grid');
   ['FoundationElevator', 'outer foundation'].forEach(function (key) {
     const f = fieldByKey[key];
@@ -1194,6 +1197,118 @@ function updateFoundationCount() {
   if (el) el.textContent = mods > 0 ? mods + ' ✎' : '';
 }
 
+// ── Data Packet panel (Trigger / Effect arrays) ────────────────────────────────
+
+
+function dpList(kind) { return kind === 'trigger' ? DATA_PACKET_TRIGGERS : DATA_PACKET_EFFECTS; }
+function dpSelKey(kind, n) { return '_dp_' + kind + '_sel_' + n; }
+
+function buildDataPacketCell(kind, n) {
+  const sel = getSlotValue(1, dpSelKey(kind, n));
+  const label = dpList(kind)[n - 1].label;
+
+  const cell = document.createElement('div');
+  cell.className = 'data-packet-cell' + (sel ? ' on' : '');
+  cell.setAttribute('data-n', n);
+  cell.onclick = function () { handleDataPacketToggle(kind, n); };
+
+  cell.innerHTML =
+    '<div class="data-packet-check">' + (sel ? '&#10003;' : '') + '</div>' +
+    '<div class="data-packet-label"><span>' + escHtml(label) + '</span></div>';
+
+  return cell;
+}
+
+function buildDataPacketPanel() {
+  const main = document.getElementById('main-panels');
+  const div = document.createElement('div');
+  div.className = 'panel';
+  div.id = 'panel-data-packet';
+
+  div.innerHTML =
+    '<div class="section-header">' +
+    '<h2>Data Packet</h2>' +
+    '<span class="count" id="data-packet-mod-count"></span>' +
+    '</div>' +
+    '<div class="field-grid" id="data-packet-bool-grid"></div>' +
+    '<button class="btn" style="margin-bottom:16px" onclick="resetDataPacket()">&#8635; Reset All</button>' +
+    '<div class="data-packet-columns">' +
+    '<div class="data-packet-section">' +
+    '<div class="foundation-section-label">Trigger Array (Must pick 8)</div>' +
+    '<div class="data-packet-grid" id="dp-grid-trigger"></div>' +
+    '</div>' +
+    '<div class="data-packet-section">' +
+    '<div class="foundation-section-label">Effect Array (Must pick 8)</div>' +
+    '<div class="data-packet-grid" id="dp-grid-effect"></div>' +
+    '</div>' +
+    '</div>';
+
+  main.appendChild(div);
+
+  const boolGrid = div.querySelector('#data-packet-bool-grid');
+  const dpField = fieldByKey['DATA PACKET'];
+  if (dpField) {
+    const val = getSlotValue(1, 'DATA PACKET');
+    const item = document.createElement('div');
+    item.className = 'bool-item' + (val ? ' on' : '');
+    item.setAttribute('data-key', 'DATA PACKET');
+    item.onclick = function () { toggleBool('DATA PACKET'); };
+    item.innerHTML =
+      '<div class="bool-check">' + (val ? '&#10003;' : '') + '</div>' +
+      '<div class="bool-item-label">' + escHtml(dpField.label || dpField.key) + '</div>';
+    boolGrid.appendChild(item);
+  }
+
+  const triggerGrid = div.querySelector('#dp-grid-trigger');
+  DATA_PACKET_TRIGGERS.forEach((_, i) => triggerGrid.appendChild(buildDataPacketCell('trigger', i + 1)));
+
+  const effectGrid = div.querySelector('#dp-grid-effect');
+  DATA_PACKET_EFFECTS.forEach((_, i) => effectGrid.appendChild(buildDataPacketCell('effect', i + 1)));
+
+  updateDataPacketCount();
+}
+
+function handleDataPacketToggle(kind, n) {
+  setSlotValue(1, dpSelKey(kind, n), !getSlotValue(1, dpSelKey(kind, n)));
+  refreshDataPacketCell(kind, n);
+}
+
+function refreshDataPacketCell(kind, n) {
+  const cell = document.querySelector('#dp-grid-' + kind + ' .data-packet-cell[data-n="' + n + '"]');
+  if (!cell) return;
+  const sel = getSlotValue(1, dpSelKey(kind, n));
+  cell.classList.toggle('on', !!sel);
+  const chk = cell.querySelector('.data-packet-check');
+  if (chk) chk.textContent = sel ? '✓' : '';
+}
+
+function refreshDataPacketPanel() {
+  DATA_PACKET_TRIGGERS.forEach((_, i) => refreshDataPacketCell('trigger', i + 1));
+  DATA_PACKET_EFFECTS.forEach((_, i) => refreshDataPacketCell('effect', i + 1));
+  updateDataPacketCount();
+}
+
+function resetDataPacket() {
+  DATA_PACKET_FIELDS.forEach(f => { delete slotData[f.key]; });
+  refreshDataPacketPanel();
+  updateModifiedCounts();
+  updateFooter();
+  toast('Data Packet reset to default');
+}
+
+function updateDataPacketCount() {
+  let selTrigger = 0, selEffect = 0;
+  DATA_PACKET_TRIGGERS.forEach((_, i) => { if (getSlotValue(1, dpSelKey('trigger', i + 1))) selTrigger++; });
+  DATA_PACKET_EFFECTS.forEach((_, i) => { if (getSlotValue(1, dpSelKey('effect', i + 1))) selEffect++; });
+
+  const el = document.getElementById('data-packet-mod-count');
+  if (el) el.textContent = selTrigger + ' trigger(s), ' + selEffect + ' effect(s) selected';
+
+  const navEl = document.getElementById('cnt-data-packet');
+  const total = selTrigger + selEffect;
+  if (navEl) navEl.textContent = total > 0 ? total + ' ✎' : '';
+}
+
 // ── Downloads ─────────────────────────────────────────────────────────────────
 
 async function downloadEncrypted() {
@@ -1287,6 +1402,7 @@ buildRarityPanel();
 buildChamberAdditionsPanel();
 buildFloorplanAdditionsPanel();
 buildFoundationPanel();
+buildDataPacketPanel();
 buildSearchPanel();
 showPanel('editor-Core');
 updateBoolCount();

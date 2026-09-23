@@ -959,10 +959,14 @@ const CATEGORIES = {
     "Vestibule Added",
     "Tunnel Added",
   ],
+  "Data Packet": [
+    "DATA PACKET",
+  ],
 };
 
 // Boolean flags shown in the Flags panel
 const BOOL_FIELDS = [
+  { "key": "DATA PACKET", "label": "Data Packet Downloaded (Just the ability to change it, not required for custom packet)", "value": false },
   { "key": "Cheat Bool", "label": "Cheat Bool (open doors fast maybe other stuff)", "value": false },
   { "key": "46v", "label": "Ignore 46 Cutscene", "value": false },
   { "key": "sanctum key 1", "label": "Sanctum Key 1", "value": false },
@@ -1085,7 +1089,6 @@ const BOOL_FIELDS = [
   { "key": "PoolGoldPickedUp", "label": "Pool Gold Picked Up", "value": false },
   { "key": "Morning Star", "label": "Morning Star Collected", "value": false },
   { "key": "Satellite", "label": "Satellite Activated", "value": false, "imgSlug": "satellite" },
-  { "key": "DATA PACKET", "label": "Data Packet Found", "value": false },
   { "key": "a new clue", "label": "New Clue Available", "value": false },
   { "key": "Upgrade Disc - Archives", "label": "Upgrade Disc: Archives", "value": false },
   { "key": "Upgrade Disc - Bootleg", "label": "Upgrade Disc: Bootleg", "value": false },
@@ -1240,6 +1243,61 @@ const RARITY_ROOMS = [
   "TERRACE", "LAUNDRY ROOM", "CHAMBER OF MIRRORS", "BOILER ROOM", "MECHANARIUM",
   "NOOK", "UTILITY CLOSET", "GREAT HALL",
 ];
+
+// ── Data Packet trigger/effect arrays ───────────────────────────────────────
+
+const DATA_PACKET_TRIGGERS = [
+  { label: "Immediately,", value: 4 },
+  { label: "When you draft a Red Room, lose 5 steps and then,", value: 7 },
+  { label: "Each time you eat an apple,", value: 8 },
+  { label: "While drafting, if you draw a DRAWING ROOM floorplan,", value: 16 },
+  { label: "Whenever you draft a Shop room", value: 13 },
+  { label: "The first time you enter each room oon Rank 9,", value: 2 },
+  { label: "Each time you unlock or bypass a security door,", value: 1 },
+  { label: "For each room with a fireplace you draft,", value: 26 },
+  { label: "Whenever you spend 2 or more gems drafting a room,", value: 9 },
+  { label: "For ever room you draft within the next 40 seconds,", value: 25 },
+  { label: "For each bedroom you draft after your second,", value: 6 },
+  { label: "Each time you access a different terminal today", value: 14 },
+  { label: "Whenever you draft an 'archived' floorplan", value: 10 },
+  { label: "Each time you draft an upgraded floorplan,", value: 23 },
+  { label: "The next 3 times you unlock and open a chest,", value: 5 },
+  { label: "Each time you pull a different antechamber lever", value: 22 },
+  { label: "When you draft a Hallway from another Hallway,", value: 30 },
+  { label: "The next 10 times you view your map, lose 10 steps and then,", value: 29 },
+  { label: "Each time you find some trash while digging,", value: 11 },
+  { label: "Each time you draft a tomorrow room,", value: 24 },
+  { label: "Whenever you spend 4 gold or more on a single purchase,", value: 3 },
+  { label: "Whenever you add floorplans to your draft pool,", value: 12 },
+  { label: "If you are in a hallway and use a key,", value: 18 },
+];
+const DATA_PACKET_EFFECTS = [
+  { label: "gain 1 key, 1 gem, or 1 die (selected randomly)", value: 16 },
+  { label: "permanently add 1 gold to your allowance.", value: 14 },
+  { label: "set your Steps to 40.", value: 1 },
+  { label: "lose 10 steps and gain 20 gold.", value: 7 },
+  { label: "add a small chest to the Entrance Hall.", value: 5 },
+  { label: "stock your PANTRY with fruit.", value: 13 },
+  { label: "gain 1 key for every 2 Hallways in your house.", value: 2 },
+  { label: "lower the Resevoir by 1", value: 10 },
+  { label: "gain +1 star.", value: 15 },
+  { label: "remove a crate from the tunnel.", value: 24 },
+  { label: "gain 3 gold for each red room in your house.", value: 17 },
+  { label: "unseal one of the doors of the ANTECHAMBER", value: 23 },
+  { label: "spread dirt on the driveway.", value: 12 },
+  { label: "gain 1 key for every 30 steps you have.", value: 28 },
+  { label: "set your dice to 2.", value: 6 },
+  { label: "permanently increase your lockpicking skill.", value: 25 },
+  { label: "add 3 Aquariums to today's draft pool.", value: 4 },
+  { label: "gain 1 random item, then set your keys to 0", value: 26 },
+  { label: "a letter will be delivered to the Mail Room.", value: 9 },
+  { label: "lose half your steps, then gain 4 Ivory Die.", value: 27 },
+  { label: "-1 Gem +2 keys (will break experiment if pulled)", value: 3 },
+  { label: "Unlock all hallways (will break experiment if pulled)", value: 8 },
+];
+const DATA_PACKET_FIELDS = [];
+DATA_PACKET_TRIGGERS.forEach((_, i) => { DATA_PACKET_FIELDS.push({ key: '_dp_trigger_sel_' + (i + 1), value: false }); });
+DATA_PACKET_EFFECTS.forEach((_, i) => { DATA_PACKET_FIELDS.push({ key: '_dp_effect_sel_' + (i + 1), value: false }); });
 
 // Hidden boolean fields — written to the save with fixed defaults, never shown in the UI.
 // These are internal game-state tracking flags extracted from a real save file.

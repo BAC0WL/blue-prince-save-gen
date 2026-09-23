@@ -107,6 +107,19 @@ function buildRoomRecordsValuesStr(count) {
   return rows.join(',\n');
 }
 
+// Data Packet trigger/effect arrays — one System.Int32 entry per checked slot,
+// using that slot's mapped value from DATA_PACKET_TRIGGERS / DATA_PACKET_EFFECTS
+// (fields.js) rather than its on-screen placeholder number.
+function buildDataPacketArrayStr(slot, kind, list) {
+  const rows = [];
+  list.forEach((item, i) => {
+    const n = i + 1;
+    if (!getSlotValue(slot, '_dp_' + kind + '_sel_' + n)) return;
+    rows.push('\t\t\t\t{\n\t\t\t\t\t"__type" : "System.Int32"' + item.value + '\n\t\t\t\t}');
+  });
+  return rows.join(',\n');
+}
+
 function buildArraysStr(slot) {
   let str = ARRAYS_TEMPLATE.replace(
     /"Rarity Shifts Values":\[[\s\S]*?\]/,
@@ -119,6 +132,15 @@ function buildArraysStr(slot) {
       return '"RoomRecords Values":[\n' + buildRoomRecordsValuesStr(count) + '\n\t\t\t]';
     });
   }
+
+  str = str.replace(
+    /"trigger array":\[[\s\S]*?\]/,
+    '"trigger array":[\n' + buildDataPacketArrayStr(slot, 'trigger', DATA_PACKET_TRIGGERS) + '\n\t\t\t]'
+  );
+  str = str.replace(
+    /"effect array":\[[\s\S]*?\]/,
+    '"effect array":[\n' + buildDataPacketArrayStr(slot, 'effect', DATA_PACKET_EFFECTS) + '\n\t\t\t]'
+  );
 
   return str;
 }
