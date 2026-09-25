@@ -50,7 +50,7 @@ function buildObjsStr(slot) {
   // Vector3 field — foundation spawn point derived from the tile picker
   (function () {
     var tile = getSlotValue(slot, 'foundaiton tile');
-    var x = 35, z = 75; // default: tile 33, rotation 90 (original save)
+    var x = 35, z = 75; // default: tile 33, rotation 270 (original save)
     if (tile >= 1 && tile <= 45) {
       var col = ((tile - 1) % 5) + 1;
       var row = Math.ceil(tile / 5);
@@ -74,11 +74,11 @@ function buildObjsStr(slot) {
       var rawRot = parseFloat(getSlotValue(slot, 'FoundationRotation'));
       var rot = isNaN(rawRot) ? 270 : Math.round(rawRot);
       if (rot === 0) { e = east; s = south; w = west; }
-      else if (rot === 90) { e = north; s = east; w = south; }
+      else if (rot === 90) { e = south; s = west; w = north; }
       else if (rot === 180) { e = west; s = north; w = east; }
-      else { e = south; s = west; w = north; } // 270
+      else { e = north; s = east; w = south; } // 270
     } else {
-      e = 'Tile 38'; s = 'Tile 34'; w = 'Tile 28'; // original defaults (tile 33, rot 90)
+      e = 'Tile 38'; s = 'Tile 34'; w = 'Tile 28'; // original defaults (tile 33, rot 270)
     }
     parts.push('"Foundation Tile String E":{\n\t\t\t\t"__type" : "System.String""' + e + '"\n\t\t\t}');
     parts.push('"Foundation Tile String S":{\n\t\t\t\t"__type" : "System.String""' + s + '"\n\t\t\t}');
