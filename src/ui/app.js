@@ -217,16 +217,15 @@ function buildFieldRow(grid, f) {
     const selectVal = f.type === 'System.String' ? 'this.value' : 'parseInt(this.value)';
     inputHtml = '<select onchange="handleFieldChange(\'' + ek + '\', ' + selectVal + ')">' + opts + '</select>';
   } else if (f.uiType === 'searchable-select') {
-    const sid = _ssid(f.key);
     inputHtml =
-      '<div class="ss-wrap" id="' + sid + '_wrap">' +
+      '<div class="ss-wrap">' +
       '<input class="ss-input" type="text" autocomplete="off"' +
       ' value="' + escHtml(_ssLabel(f, val)) + '"' +
       ' placeholder="Search…"' +
       ' oninput="handleSsInput(\'' + ek + '\', this)"' +
       ' onfocus="handleSsFocus(\'' + ek + '\', this)"' +
       ' onblur="handleSsBlur(\'' + ek + '\', this)">' +
-      '<div class="ss-dropdown" id="' + sid + '_drop"></div>' +
+      '<div class="ss-dropdown"></div>' +
       '</div>';
   } else if (f.type === 'System.String') {
     inputHtml = '<input type="text" value="' + escHtml(String(val)) + '" oninput="handleFieldChange(\'' + ek + '\', this.value)">';
@@ -281,26 +280,38 @@ function toggleImageToggle(key) {
 
 function handleUpgradePick(key, val) {
   setSlotValue(1, key, val);
-  const row = document.querySelector('.field-row[data-key="' + key + '"]');
-  if (row) {
-    row.className = 'field-row upgrade-row' + (isModified(1, key) ? ' modified' : '');
-    row.querySelectorAll('.upgrade-option').forEach(opt => {
-      opt.classList.toggle('selected', parseInt(opt.getAttribute('data-val')) === val);
-    });
-  }
+  syncFieldRows(key);
 }
 
 function handleFieldChange(key, val) {
   setSlotValue(1, key, val);
-  const mod = isModified(1, key);
+  syncFieldRows(key, document.activeElement);
+}
+
+// A field can be rendered more than once (its category tab + the Search panel),
+// so push the current value and modified state to every copy. skipEl is the
+// input the user is typing in — leave its value alone so the caret doesn't jump.
+function syncFieldRows(key, skipEl) {
+  const f = fieldByKey[key];
+  if (!f) return;
+  const val = getSlotValue(1, key);
+  const mod = isModified(1, key) ? ' modified' : '';
   document.querySelectorAll('.field-row[data-key="' + key + '"]').forEach(row => {
-    row.className = 'field-row' + (mod ? ' modified' : '');
+    if (f.uiType === 'upgrade-picker') {
+      row.className = 'field-row upgrade-row' + mod;
+      row.querySelectorAll('.upgrade-option').forEach(opt => {
+        opt.classList.toggle('selected', parseInt(opt.getAttribute('data-val')) === val);
+      });
+      return;
+    }
+    row.className = 'field-row' + mod;
+    const inp = row.querySelector('input, select');
+    if (!inp || inp === skipEl) return;
+    inp.value = f.uiType === 'searchable-select' ? _ssLabel(f, val) : val;
   });
 }
 
 // ── Searchable select ─────────────────────────────────────────────────────────
-
-function _ssid(key) { return 'ss_' + key.replace(/[^a-zA-Z0-9]/g, '_'); }
 
 // Display text for a stored value: the matching option's label, else the raw value.
 function _ssLabel(f, value) {
@@ -308,13 +319,17 @@ function _ssLabel(f, value) {
   return opt ? opt.label : String(value);
 }
 
-function _ssRenderOptions(key, options) {
-  const drop = document.getElementById(_ssid(key) + '_drop');
+function _ssDrop(input) {
+  const wrap = input.closest('.ss-wrap');
+  return wrap ? wrap.querySelector('.ss-dropdown') : null;
+}
+
+function _ssRenderOptions(drop, key, options) {
   if (!drop) return;
   const ek2 = key.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   drop.innerHTML = options.map(o =>
     '<div class="ss-option" onmousedown="event.preventDefault();handleSsSelect(\'' + ek2 + '\',\'' +
-    String(o.value).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' +
+    String(o.value).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\', this)">' +
     escHtml(o.label) + '</div>'
   ).join('');
   drop.classList.toggle('open', options.length > 0);
@@ -322,46 +337,36 @@ function _ssRenderOptions(key, options) {
 
 function handleSsFocus(key, input) {
   input.select();
-  _ssRenderOptions(key, fieldByKey[key].options);
+  _ssRenderOptions(_ssDrop(input), key, fieldByKey[key].options);
 }
 
 function handleSsInput(key, input) {
   const f = fieldByKey[key];
   const term = input.value.toLowerCase();
   const filtered = term ? f.options.filter(o => o.label.toLowerCase().includes(term)) : f.options;
-  _ssRenderOptions(key, filtered);
+  _ssRenderOptions(_ssDrop(input), key, filtered);
 }
 
 function handleSsBlur(key, input) {
   setTimeout(function () {
-    const drop = document.getElementById(_ssid(key) + '_drop');
+    const drop = _ssDrop(input);
     if (drop) drop.classList.remove('open');
     const f = fieldByKey[key];
     const term = input.value.toLowerCase();
     const match = f.options.find(o => o.label.toLowerCase() === term)
       || f.options.find(o => String(o.value).toLowerCase() === term);
-    if (match) {
-      setSlotValue(1, key, match.value);
-      input.value = match.label;
-      const row = document.querySelector('.field-row[data-key="' + key + '"]');
-      if (row) row.className = 'field-row' + (isModified(1, key) ? ' modified' : '');
-    } else {
-      input.value = _ssLabel(f, getSlotValue(1, key));
-    }
+    if (match) setSlotValue(1, key, match.value);
+    syncFieldRows(key);
   }, 0);
 }
 
-function handleSsSelect(key, rawValue) {
+function handleSsSelect(key, rawValue, optEl) {
   const f = fieldByKey[key];
   const opt = f.options.find(o => String(o.value) === String(rawValue));
-  const value = opt ? opt.value : rawValue;
-  setSlotValue(1, key, value);
-  const wrap = document.getElementById(_ssid(key) + '_wrap');
-  if (wrap) wrap.querySelector('.ss-input').value = opt ? opt.label : String(value);
-  const drop = document.getElementById(_ssid(key) + '_drop');
+  setSlotValue(1, key, opt ? opt.value : rawValue);
+  const drop = optEl && optEl.closest('.ss-dropdown');
   if (drop) drop.classList.remove('open');
-  const row = document.querySelector('.field-row[data-key="' + key + '"]');
-  if (row) row.className = 'field-row' + (isModified(1, key) ? ' modified' : '');
+  syncFieldRows(key);
 }
 
 function toggleBool(key) {
@@ -425,11 +430,7 @@ function toggleBoilerSolved() {
       const check = item.querySelector('.bool-check');
       if (check) check.textContent = fieldVal ? '✓' : '';
     });
-    document.querySelectorAll('.field-row[data-key="' + key + '"]').forEach(row => {
-      row.className = 'field-row' + (isModified(1, key) ? ' modified' : '');
-      const input = row.querySelector('input');
-      if (input) input.value = fieldVal;
-    });
+    syncFieldRows(key);
   });
 
   document.querySelectorAll('.bool-item[data-key="' + BOILER_SOLVED_KEY + '"]').forEach(item => {
@@ -465,29 +466,14 @@ function showPanel(id) {
 // ── Refresh editor ────────────────────────────────────────────────────────────
 
 function refreshEditor() {
-  ALL_FIELDS.filter(f => !f.hidden).forEach(f => {
-    const val = getSlotValue(1, f.key);
-    const row = document.querySelector('.field-row[data-key="' + f.key + '"]');
-    if (!row) return;
-    if (f.uiType === 'upgrade-picker') {
-      row.className = 'field-row upgrade-row' + (isModified(1, f.key) ? ' modified' : '');
-      row.querySelectorAll('.upgrade-option').forEach(opt => {
-        opt.classList.toggle('selected', parseInt(opt.getAttribute('data-val')) === val);
-      });
-    } else {
-      const inp = row.querySelector('input, select');
-      if (inp) inp.value = val;
-      row.className = 'field-row' + (isModified(1, f.key) ? ' modified' : '');
-    }
-  });
+  ALL_FIELDS.filter(f => !f.hidden).forEach(f => syncFieldRows(f.key));
 
   BOOL_FIELDS.forEach(f => {
     const val = getSlotValue(1, f.key);
-    const item = document.querySelector('.bool-item[data-key="' + f.key + '"]');
-    if (item) {
+    document.querySelectorAll('.bool-item[data-key="' + f.key + '"]').forEach(item => {
       item.className = 'bool-item' + (val ? ' on' : '');
       item.querySelector('.bool-check').textContent = val ? '✓' : '';
-    }
+    });
   });
 
   // HIDDEN_BOOL_FIELDS aren't shown in the Flags panel, but a few (e.g. the
