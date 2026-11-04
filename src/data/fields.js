@@ -133,8 +133,34 @@ const ROOM_OPTIONS = [
   { "value": "WORKSHOP", "label": "Workshop" },
 ];
 
-// Hidden passthrough fields — written to the save but not shown in the UI.
-// Edit value: to change the fixed default. Do not remove entries.
+const DARE_OPTIONS = [
+  { "value": 0, "label": "None" },
+  { "value": 1, "label": "30 Seconds in Lav" },
+  { "value": 2, "label": "No Center Door in Entrance" },
+  { "value": 3, "label": "First Floorplan in Entrance" },
+  { "value": 4, "label": "1 Purchase in Shops" },
+  { "value": 5, "label": "20+ steps" },
+  { "value": 6, "label": "No 5 rooms in rank" },
+  { "value": 7, "label": "Empty Parlor Box" },
+  { "value": 8, "label": "One Switch in Util" },
+  { "value": 9, "label": "Leave Blueprint" },
+  { "value": 10, "label": "All Correct Billiards" },
+  { "value": 11, "label": "Never Enter Pool" },
+  { "value": 12, "label": "Open All Trunks" },
+  { "value": 13, "label": "Never Enter Room 4 times" },
+  { "value": 14, "label": "Never Draft Den" },
+  { "value": 15, "label": "Take Most Expensive Floorplan with 3+ Gems" },
+  { "value": 16, "label": "Always Draft Red" },
+  { "value": 17, "label": "No Fruit" },
+  { "value": 18, "label": "No Elevators" },
+  { "value": 19, "label": "Never Draft South" },
+  { "value": 20, "label": "End with 1+ gems" },
+  { "value": 21, "label": "6 Different Room Colors" },
+  { "value": 22, "label": "Never Leave Through Entrance Hall" },
+  { "value": 23, "label": "End With 0 Gems, Keys, Coins" }
+];
+
+
 const HIDDEN_FIELDS = [
   { "key": "GAME CLOCK", "label": "Time Played", "desc": "For stuff like Antechamber Lever Experiment", "type": "System.Single", "value": 0.0, "hidden": false },
   { "key": "GAME CLOCK WIN", "type": "System.Single", "value": 0.0, "hidden": true },
@@ -702,15 +728,15 @@ const EDITABLE_FIELDS = [
   { "key": "TCount Explorers", "type": "System.Int32", "value": 0, "label": "Explorer Rooms Drafted", "desc": "Lifetime count of rooms drafted. Needed for Explorers trophy." },
   { "key": "TCount Sigils", "type": "System.Int32", "value": 0, "label": "Sigils Collected (lifetime)", "desc": "Lifetime sigil count for trophy tracking." },
   { "key": "TCount Room8 Puzzles", "type": "System.Int32", "value": 0, "label": "Room 8 Puzzles Solved", "desc": "Lifetime Room 8 puzzle solves for trophy tracking." },
-  { "key": "Dare Number", "type": "System.Int32", "value": 0, "label": "Active Dare #", "desc": "I HAVENT TESTED ANY OF THIS AND I ALSO HAVENT EVER DONE DARE MODE SO IDK" },
-  { "key": "Dare 1", "type": "System.Int32", "value": 0, "label": "Dare 1 State" },
-  { "key": "Dare 2", "type": "System.Int32", "value": 0, "label": "Dare 2 State" },
-  { "key": "Dare 3", "type": "System.Int32", "value": 0, "label": "Dare 3 State" },
-  { "key": "Dare 4", "type": "System.Int32", "value": 0, "label": "Dare 4 State" },
-  { "key": "Dare 5", "type": "System.Int32", "value": 0, "label": "Dare 5 State" },
-  { "key": "Dare 6", "type": "System.Int32", "value": 0, "label": "Dare 6 State" },
-  { "key": "Dare 7", "type": "System.Int32", "value": 0, "label": "Dare 7 State" },
-  { "key": "Dare 8", "type": "System.Int32", "value": 0, "label": "Dare 8 State" },
+  { "key": "Dare Number", "type": "System.Int32", "value": 0, "label": "Number of Dares", "desc": "cool" },
+  { "key": "Dare 1", "type": "System.Int32", "uiType": "select", "value": 0, "label": "Dare 1", "options": DARE_OPTIONS },
+  { "key": "Dare 2", "type": "System.Int32", "uiType": "select", "value": 0, "label": "Dare 2", "options": DARE_OPTIONS },
+  { "key": "Dare 3", "type": "System.Int32", "uiType": "select", "value": 0, "label": "Dare 3", "options": DARE_OPTIONS },
+  { "key": "Dare 4", "type": "System.Int32", "uiType": "select", "value": 0, "label": "Dare 4", "options": DARE_OPTIONS },
+  { "key": "Dare 5", "type": "System.Int32", "uiType": "select", "value": 0, "label": "Dare 5", "options": DARE_OPTIONS },
+  { "key": "Dare 6", "type": "System.Int32", "uiType": "select", "value": 0, "label": "Dare 6", "options": DARE_OPTIONS },
+  { "key": "Dare 7", "type": "System.Int32", "uiType": "select", "value": 0, "label": "Dare 7", "options": DARE_OPTIONS },
+  { "key": "Dare 8", "type": "System.Int32", "uiType": "select", "value": 0, "label": "Dare 8", "options": DARE_OPTIONS },
   { "key": "Help Desk Token", "type": "System.Int32", "value": 0, "label": "Help Desk Token?", "desc": "genuinely no idea but you can try it" },
   { "key": "Wish Count", "type": "System.Int32", "value": 0, "label": "Wishes Used", "desc": "Number of coins in the fountain" },
   { "key": "Sanctum Key Moon", "type": "System.Int32", "value": 0, "label": "Sanctum Moon Key", "desc": "get mooned" },
@@ -866,7 +892,7 @@ const CATEGORIES = {
     "TCount Room8 Puzzles",
     "The Dead End Record",
   ],
-  "Dare Runs": [
+  "Dare Mode": [
     "Dare Number",
     "Dare 1",
     "Dare 2",
