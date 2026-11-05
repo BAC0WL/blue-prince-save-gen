@@ -697,13 +697,19 @@ label.file-label:hover { background: var(--bg3); color: var(--text); }
 .data-packet-cell:hover { background: var(--bg3); border-color: var(--border2); }
 .data-packet-cell.on    { background: var(--green-bg); border-color: #2a8a58; }
 
-.data-packet-check {
-  width: 16px; height: 16px; border-radius: 4px;
-  border: 1px solid var(--border2); background: var(--bg3);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; font-size: 11px; transition: all .12s;
+input[type=number].data-packet-count {
+  width: 36px; padding: 4px; font-size: 12px; text-align: center;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 6px; color: var(--text); outline: none;
+  flex-shrink: 0; font-family: inherit;
+  appearance: textfield; -moz-appearance: textfield;
 }
-.data-packet-cell.on .data-packet-check { background: var(--green); border-color: var(--green); color: #fff; }
+input[type=number].data-packet-count::-webkit-inner-spin-button,
+input[type=number].data-packet-count::-webkit-outer-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+input[type=number].data-packet-count:focus { border-color: var(--accent); background: var(--bg4); }
+.data-packet-cell.on input[type=number].data-packet-count { border-color: var(--green); color: var(--green); }
 
 .data-packet-label {
   font-size: 12px; color: var(--text2); flex: 1; word-break: break-word;

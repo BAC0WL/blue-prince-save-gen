@@ -21,6 +21,8 @@ function buildObjsStr(slot) {
     let valStr;
     if (f.type === 'System.String') {
       valStr = '"' + String(val).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+    } else if (f.type === 'System.Int32') {
+      valStr = String(clampInt32(val)); // saved configs may hold out-of-range values
     } else {
       valStr = String(val);
     }
@@ -107,15 +109,16 @@ function buildRoomRecordsValuesStr(count) {
   return rows.join(',\n');
 }
 
-// Data Packet trigger/effect arrays — one System.Int32 entry per checked slot,
-// using that slot's mapped value from DATA_PACKET_TRIGGERS / DATA_PACKET_EFFECTS
+// Data Packet trigger/effect arrays — one System.Int32 entry per copy of each
+// slot, using that slot's mapped value from DATA_PACKET_TRIGGERS / DATA_PACKET_EFFECTS
 // (fields.js) rather than its on-screen placeholder number.
 function buildDataPacketArrayStr(slot, kind, list) {
   const rows = [];
   list.forEach((item, i) => {
-    const n = i + 1;
-    if (!getSlotValue(slot, '_dp_' + kind + '_sel_' + n)) return;
-    rows.push('\t\t\t\t{\n\t\t\t\t\t"__type" : "System.Int32"' + item.value + '\n\t\t\t\t}');
+    const copies = dpCopies(getSlotValue(slot, '_dp_' + kind + '_sel_' + (i + 1)));
+    for (let c = 0; c < copies; c++) {
+      rows.push('\t\t\t\t{\n\t\t\t\t\t"__type" : "System.Int32"' + item.value + '\n\t\t\t\t}');
+    }
   });
   return rows.join(',\n');
 }

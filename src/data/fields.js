@@ -757,6 +757,14 @@ const EDITABLE_FIELDS = [
   { "key": "NETWORK PASSWORD", "type": "System.String", "value": "SWANSONG", "label": "Network Password", "desc": "The current password for the network terminal. Default is SWANSONG. Why do they let you change this?" },
 ];
 
+const INT32_MIN = -2147483648;
+const INT32_MAX = 2147483647;
+// Whole number within System.Int32's range; anything non-numeric becomes 0.
+function clampInt32(val) {
+  const n = Math.trunc(Number(val)) || 0;
+  return Math.min(INT32_MAX, Math.max(INT32_MIN, n));
+}
+
 // Combined — do not edit this line
 const ALL_FIELDS = [...HIDDEN_FIELDS, ...EDITABLE_FIELDS];
 
@@ -1321,9 +1329,16 @@ const DATA_PACKET_EFFECTS = [
   { label: "-1 Gem +2 keys (will break experiment if pulled)", value: 3 },
   { label: "Unlock all hallways (will break experiment if pulled)", value: 8 },
 ];
+const DATA_PACKET_MAX_COPIES = 8;
+// Copies of a trigger/effect to write. Configs saved before counts existed hold
+// booleans here, which Number() maps to 0 or 1.
+function dpCopies(val) {
+  const n = Math.trunc(Number(val)) || 0;
+  return Math.min(DATA_PACKET_MAX_COPIES, Math.max(0, n));
+}
 const DATA_PACKET_FIELDS = [];
-DATA_PACKET_TRIGGERS.forEach((_, i) => { DATA_PACKET_FIELDS.push({ key: '_dp_trigger_sel_' + (i + 1), value: false }); });
-DATA_PACKET_EFFECTS.forEach((_, i) => { DATA_PACKET_FIELDS.push({ key: '_dp_effect_sel_' + (i + 1), value: false }); });
+DATA_PACKET_TRIGGERS.forEach((_, i) => { DATA_PACKET_FIELDS.push({ key: '_dp_trigger_sel_' + (i + 1), value: 0 }); });
+DATA_PACKET_EFFECTS.forEach((_, i) => { DATA_PACKET_FIELDS.push({ key: '_dp_effect_sel_' + (i + 1), value: 0 }); });
 
 // Hidden boolean fields — written to the save with fixed defaults, never shown in the UI.
 // These are internal game-state tracking flags extracted from a real save file.

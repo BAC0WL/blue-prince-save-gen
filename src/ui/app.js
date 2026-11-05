@@ -232,7 +232,7 @@ function buildFieldRow(grid, f) {
   } else if (f.type === 'System.Single') {
     inputHtml = '<input type="number" step="any" value="' + val + '" onchange="handleFieldChange(\'' + ek + '\', parseFloat(this.value) || 0)">';
   } else {
-    inputHtml = '<input type="number" step="1" value="' + val + '" onchange="handleFieldChange(\'' + ek + '\', parseInt(this.value) || 0)">';
+    inputHtml = '<input type="number" step="1" min="' + INT32_MIN + '" max="' + INT32_MAX + '" value="' + val + '" onchange="this.value = clampInt32(this.value); handleFieldChange(\'' + ek + '\', Number(this.value))">';
   }
 
   row.innerHTML =
@@ -802,8 +802,8 @@ function buildChamberAdditionsPanel() {
         '<img src="src/ui/rarity/' + slug + '.png" alt="' + escHtml(displayName) + '" onerror="this.classList.add(\'broken\')">' +
         '</div>' +
         '<div class="rarity-room-name">' + escHtml(displayName) + '</div>' +
-        '<input type="number" class="chamber-count-input" min="0" step="1" value="' + val + '" ' +
-        'onchange="handleChamberChange(\'' + ek + '\', parseInt(this.value) || 0)">';
+        '<input type="number" class="chamber-count-input" min="0" max="' + INT32_MAX + '" step="1" value="' + val + '" ' +
+        'onchange="this.value = clampInt32(this.value); handleChamberChange(\'' + ek + '\', Number(this.value))">';
 
       grid.appendChild(card);
     });
@@ -1190,16 +1190,18 @@ function dpList(kind) { return kind === 'trigger' ? DATA_PACKET_TRIGGERS : DATA_
 function dpSelKey(kind, n) { return '_dp_' + kind + '_sel_' + n; }
 
 function buildDataPacketCell(kind, n) {
-  const sel = getSlotValue(1, dpSelKey(kind, n));
+  const copies = dpCopies(getSlotValue(1, dpSelKey(kind, n)));
   const label = dpList(kind)[n - 1].label;
 
   const cell = document.createElement('div');
-  cell.className = 'data-packet-cell' + (sel ? ' on' : '');
+  cell.className = 'data-packet-cell' + (copies ? ' on' : '');
   cell.setAttribute('data-n', n);
   cell.onclick = function () { handleDataPacketToggle(kind, n); };
 
   cell.innerHTML =
-    '<div class="data-packet-check">' + (sel ? '&#10003;' : '') + '</div>' +
+    '<input type="number" class="data-packet-count" min="0" max="' + DATA_PACKET_MAX_COPIES + '" step="1" value="' + copies + '" ' +
+    'aria-label="Copies" onclick="event.stopPropagation()" ' +
+    'onchange="handleDataPacketCount(\'' + kind + '\', ' + n + ', this.value)">' +
     '<div class="data-packet-label"><span>' + escHtml(label) + '</span></div>';
 
   return cell;
@@ -1220,11 +1222,11 @@ function buildDataPacketPanel() {
     '<button class="btn" style="margin-bottom:16px" onclick="resetDataPacket()">&#8635; Reset All</button>' +
     '<div class="data-packet-columns">' +
     '<div class="data-packet-section">' +
-    '<div class="foundation-section-label">Trigger Array (Must pick 8)</div>' +
+    '<div class="foundation-section-label">Trigger Array (Must have at least 8)</div>' +
     '<div class="data-packet-grid" id="dp-grid-trigger"></div>' +
     '</div>' +
     '<div class="data-packet-section">' +
-    '<div class="foundation-section-label">Effect Array (Must pick 8)</div>' +
+    '<div class="foundation-section-label">Effect Array (Must have at least 8)</div>' +
     '<div class="data-packet-grid" id="dp-grid-effect"></div>' +
     '</div>' +
     '</div>';
@@ -1254,18 +1256,23 @@ function buildDataPacketPanel() {
   updateDataPacketCount();
 }
 
+// Clicking a cell switches it between 0 and 1 copies.
 function handleDataPacketToggle(kind, n) {
-  setSlotValue(1, dpSelKey(kind, n), !getSlotValue(1, dpSelKey(kind, n)));
+  handleDataPacketCount(kind, n, dpCopies(getSlotValue(1, dpSelKey(kind, n))) ? 0 : 1);
+}
+
+function handleDataPacketCount(kind, n, val) {
+  setSlotValue(1, dpSelKey(kind, n), dpCopies(val));
   refreshDataPacketCell(kind, n);
 }
 
 function refreshDataPacketCell(kind, n) {
   const cell = document.querySelector('#dp-grid-' + kind + ' .data-packet-cell[data-n="' + n + '"]');
   if (!cell) return;
-  const sel = getSlotValue(1, dpSelKey(kind, n));
-  cell.classList.toggle('on', !!sel);
-  const chk = cell.querySelector('.data-packet-check');
-  if (chk) chk.textContent = sel ? '✓' : '';
+  const copies = dpCopies(getSlotValue(1, dpSelKey(kind, n)));
+  cell.classList.toggle('on', copies > 0);
+  const inp = cell.querySelector('.data-packet-count');
+  if (inp) inp.value = copies;
 }
 
 function refreshDataPacketPanel() {
@@ -1284,8 +1291,8 @@ function resetDataPacket() {
 
 function updateDataPacketCount() {
   let selTrigger = 0, selEffect = 0;
-  DATA_PACKET_TRIGGERS.forEach((_, i) => { if (getSlotValue(1, dpSelKey('trigger', i + 1))) selTrigger++; });
-  DATA_PACKET_EFFECTS.forEach((_, i) => { if (getSlotValue(1, dpSelKey('effect', i + 1))) selEffect++; });
+  DATA_PACKET_TRIGGERS.forEach((_, i) => { selTrigger += dpCopies(getSlotValue(1, dpSelKey('trigger', i + 1))); });
+  DATA_PACKET_EFFECTS.forEach((_, i) => { selEffect += dpCopies(getSlotValue(1, dpSelKey('effect', i + 1))); });
 
   const el = document.getElementById('data-packet-mod-count');
   if (el) el.textContent = selTrigger + ' trigger(s), ' + selEffect + ' effect(s) selected';
