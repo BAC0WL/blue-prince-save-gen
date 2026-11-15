@@ -987,7 +987,7 @@ function handleGlobalSearch(term) {
 
   ALL_FIELDS.forEach(f => {
     if (f.hidden || SEARCH_EXCLUDE_KEYS.has(f.key)) return;
-    if (((f.label || '') + ' ' + (f.desc || '')).toLowerCase().includes(t)) {
+    if (((f.label || f.key) + ' ' + (f.desc || '')).toLowerCase().includes(t)) {
       matches.push({ type: 'field', f, section: getSectionForKey(f.key) });
     }
   });
