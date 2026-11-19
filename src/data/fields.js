@@ -157,7 +157,8 @@ const DARE_OPTIONS = [
   { "value": 20, "label": "End with 1+ gems" },
   { "value": 21, "label": "6 Different Room Colors" },
   { "value": 22, "label": "Never Leave Through Entrance Hall" },
-  { "value": 23, "label": "End With 0 Gems, Keys, Coins" }
+  { "value": 23, "label": "End With 0 Gems, Keys, Coins" },
+  { "value": 24, "label": "2 or less special items" }
 ];
 
 
